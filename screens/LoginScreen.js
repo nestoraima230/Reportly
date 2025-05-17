@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { loginWithEmail } from '../config/firebaseAuthService';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -24,9 +25,15 @@ export default function LoginScreen({ navigation }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      navigation.navigate('Home');  
+      try {
+        const user = await loginWithEmail(email, password);
+        Alert.alert("Bienvenido", `Has iniciado sesión como ${user.email}`);
+        navigation.navigate('GettingStarted')
+      } catch (error) {
+        Alert.alert("Error al iniciar sesión", error.message);
+      }
     }
   };
 

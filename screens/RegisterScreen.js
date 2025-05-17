@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { registerWithEmail } from '../config/firebaseAuthService';
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -17,7 +17,7 @@ export default function RegisterScreen({ navigation }) {
     if (!fullName) {
       newErrors.fullName = 'El nombre es obligatorio';
     } else if (!usernameRegex.test(fullName)) {
-      newErrors.fullName = 'Solo letras, máximo 12 caracteres, sin símbolos';
+      newErrors.fullName = 'Solo letras, máximo 40 caracteres, sin símbolos';
     }
 
     if (!email) {
@@ -37,14 +37,18 @@ export default function RegisterScreen({ navigation }) {
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (validateForm()) {
-      Alert.alert('Registro exitoso', '¡Bienvenido a bordo!');
-      navigation.navigate('Login');
+      try {
+        const user = await registerWithEmail(email, password, fullName);
+        Alert.alert("Registro exitoso", `Bienvenido, ${user.displayName || user.email}`);
+        navigation.navigate("Login");
+      } catch (error) {
+        Alert.alert("Error al registrarse", error.message);
+      }
     }
   };
 
