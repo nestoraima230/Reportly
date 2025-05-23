@@ -31,6 +31,7 @@ export default function LoginScreen({ navigation }) {
         const user = await loginWithEmail(email, password);
         Alert.alert("Bienvenido", `Has iniciado sesión como ${user.email}`);
         navigation.navigate('GettingStarted')
+        //navigation.navigate("Feed"); 
       } catch (error) {
         Alert.alert("Error al iniciar sesión", error.message);
       }
@@ -75,6 +76,21 @@ export default function LoginScreen({ navigation }) {
           Regístrate aquí
         </Text>
       </Text>
+
+      {/* Botón para ir a Editar Perfil directamente */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#4e6270', marginTop: 30 }]}
+        onPress={() => navigation.navigate('EditProfile')}
+      >
+        <Text style={styles.buttonText}>Ir a Editar Perfil</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#778899', marginTop: 10 }]}
+        onPress={() => navigation.navigate('CreateReport')}
+      >
+       <Text style={styles.buttonText}>Ir a Crear Reporte</Text>
+      </TouchableOpacity>
     </View>
   );
 }
