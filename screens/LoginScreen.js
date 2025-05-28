@@ -30,7 +30,7 @@ export default function LoginScreen({ navigation }) {
       try {
         const user = await loginWithEmail(email, password);
         Alert.alert("Bienvenido", `Has iniciado sesión como ${user.email}`);
-        navigation.navigate('GettingStarted')
+        //navigation.navigate('Home')
         //navigation.navigate("Feed"); 
       } catch (error) {
         Alert.alert("Error al iniciar sesión", error.message);
@@ -77,7 +77,7 @@ export default function LoginScreen({ navigation }) {
         </Text>
       </Text>
 
-      {/* Botón para ir a Editar Perfil directamente */}
+      {/* Botón para ir a Editar Perfil y Crear Reporte directamente */}
       <TouchableOpacity
         style={[styles.button, { backgroundColor: '#4e6270', marginTop: 30 }]}
         onPress={() => navigation.navigate('EditProfile')}

@@ -45,7 +45,7 @@ export default function RegisterScreen({ navigation }) {
       try {
         const user = await registerWithEmail(email, password, fullName);
         Alert.alert("Registro exitoso", `Bienvenido, ${user.displayName || user.email}`);
-        navigation.navigate("Login");
+      //navigation.navigate("Home");
       //navigation.navigate("Feed"); 
       } catch (error) {
         Alert.alert("Error al registrarse", error.message);

@@ -37,8 +37,8 @@ export default function CreateReport({ navigation }) {
       return;
     }
 
-    Alert.alert('¡Reporte publicado!', `Título: ${titulo}`);
-    // Aquí podrías guardar el reporte en una base de datos o backend
+     Alert.alert('¡Reporte publicado!', `Título: ${titulo}`);
+     // Aquí podrías guardar el reporte en una base de datos o backend
   };
 
   return (
