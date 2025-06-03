@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Alert,
-  ScrollView
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  Image, Alert, ScrollView, ActivityIndicator
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { storage, db } from '../config/firebaseConfig'; // Asegúrate de que la ruta es correcta
 
 export default function CreateReport({ navigation }) {
   const [titulo, setTitulo] = useState('');
@@ -17,6 +14,7 @@ export default function CreateReport({ navigation }) {
   const [ubicacion, setUbicacion] = useState('');
   const [etiquetas, setEtiquetas] = useState('');
   const [imagen, setImagen] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const seleccionarImagen = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -31,14 +29,47 @@ export default function CreateReport({ navigation }) {
     }
   };
 
-  const publicarReporte = () => {
+  const subirImagen = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const filename = `reportes/${Date.now()}.jpg`;
+    const storageRef = ref(storage, filename);
+    await uploadBytes(storageRef, blob);
+    const url = await getDownloadURL(storageRef);
+    return url;
+  };
+
+  const publicarReporte = async () => {
     if (!titulo || !descripcion || !ubicacion) {
       Alert.alert('Error', 'Por favor, completa todos los campos obligatorios.');
       return;
     }
 
-     Alert.alert('¡Reporte publicado!', `Título: ${titulo}`);
-     // Aquí podrías guardar el reporte en una base de datos o backend
+    setLoading(true);
+    let imagenURL = '';
+
+    try {
+      if (imagen) {
+        imagenURL = await subirImagen(imagen);
+      }
+
+      await addDoc(collection(db, 'reportes'), {
+        titulo,
+        descripcion,
+        ubicacion,
+        etiquetas: etiquetas.split(',').map(e => e.trim()),
+        imagenURL,
+        creadoEn: serverTimestamp(),
+      });
+
+      Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
+      navigation.navigate('Feed'); // o cualquier otra pantalla
+    } catch (error) {
+      console.error('Error al publicar:', error);
+      Alert.alert('Error', 'No se pudo guardar el reporte.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -82,8 +113,12 @@ export default function CreateReport({ navigation }) {
         onChangeText={setEtiquetas}
       />
 
-      <TouchableOpacity style={styles.button} onPress={publicarReporte}>
-        <Text style={styles.buttonText}>Publicar</Text>
+      <TouchableOpacity style={styles.button} onPress={publicarReporte} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Publicar</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );

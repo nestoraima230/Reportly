@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { registerWithEmail } from '../config/firebaseAuthService';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
+
+const db = getFirestore(app);
+
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -40,18 +45,26 @@ export default function RegisterScreen({ navigation }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = async () => {
-    if (validateForm()) {
-      try {
-        const user = await registerWithEmail(email, password, fullName);
-        Alert.alert("Registro exitoso", `Bienvenido, ${user.displayName || user.email}`);
-      //navigation.navigate("Home");
-      //navigation.navigate("Feed"); 
-      } catch (error) {
-        Alert.alert("Error al registrarse", error.message);
-      }
+const handleRegister = async () => {
+  if (validateForm()) {
+    try {
+      const userCredential = await registerWithEmail(email, password, fullName);
+      const user = userCredential.user;
+
+      // Crear documento en Firestore con UID del usuario
+      await setDoc(doc(db, 'usuarios', user.uid), {
+        username: fullName,
+        profileImage: '',
+        address: '',
+        posts: []
+      });
+
+      Alert.alert("Registro exitoso", `Bienvenido, ${fullName}`);
+    } catch (error) {
+      Alert.alert("Error al registrarse", error.message);
     }
-  };
+  }
+};
 
   return (
     <View style={styles.container}>

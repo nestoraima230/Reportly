@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { loginWithEmail } from '../config/firebaseAuthService';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+
+  const db = getFirestore(app);
 
   const validateForm = () => {
     const newErrors = {};
@@ -29,9 +33,21 @@ export default function LoginScreen({ navigation }) {
     if (validateForm()) {
       try {
         const user = await loginWithEmail(email, password);
-        Alert.alert("Bienvenido", `Has iniciado sesión como ${user.email}`);
-        //navigation.navigate('Home')
-        //navigation.navigate("Feed"); 
+
+        // Obtener los datos del perfil desde Firestore
+        const userDocRef = doc(db, 'usuarios', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const profile = userDoc.data();
+          console.log('Perfil cargado:', profile);
+          Alert.alert("Bienvenido", `Hola, ${profile.username}`);
+          navigation.navigate('Profile', { profile });
+        } else {
+          console.log('No se encontró el documento del usuario');
+          Alert.alert('Error', 'No se encontraron datos del perfil.');
+        }
+
       } catch (error) {
         Alert.alert("Error al iniciar sesión", error.message);
       }
@@ -76,21 +92,6 @@ export default function LoginScreen({ navigation }) {
           Regístrate aquí
         </Text>
       </Text>
-
-      {/* Botón para ir a Editar Perfil y Crear Reporte directamente */}
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#4e6270', marginTop: 30 }]}
-        onPress={() => navigation.navigate('EditProfile')}
-      >
-        <Text style={styles.buttonText}>Ir a Editar Perfil</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#778899', marginTop: 10 }]}
-        onPress={() => navigation.navigate('CreateReport')}
-      >
-       <Text style={styles.buttonText}>Ir a Crear Reporte</Text>
-      </TouchableOpacity>
     </View>
   );
 }
