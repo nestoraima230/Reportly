@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Share } from 'react-native';
 import { FAB } from 'react-native-paper';
-import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { app } from '../config/firebaseConfig';
 
 const db = getFirestore(app);
 
 export default function Feed() {
-  const [posts, setPosts] = useState([]);
+  const [reportes, setReportes] = useState([]);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const q = query(collection(db, 'reportes'), orderBy('createdAt', 'desc'));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const reports = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(collection(db, 'reportes'), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        title: doc.data().titulo,
+        description: doc.data().descripcion,
+        image: doc.data().imagenURL,
+        comments: doc.data().comentarios || [],
       }));
-      setPosts(reports);
+      setReportes(data);
     });
 
     return () => unsubscribe();
@@ -70,11 +71,11 @@ export default function Feed() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={posts}
+        data={reportes}
         keyExtractor={(item) => item.id}
         renderItem={renderPost}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún</Text>}
       />
 
       <FAB

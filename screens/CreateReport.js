@@ -4,43 +4,119 @@ import {
   Image, Alert, ScrollView, ActivityIndicator
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as Location from 'expo-location';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { storage, db } from '../config/firebaseConfig'; // Asegúrate de que la ruta es correcta
+import { getAuth } from 'firebase/auth';
+import { app, db } from '../config/firebaseConfig';
+import UbicationSelector from '../utils/ubicationSelector';
 
 export default function CreateReport({ navigation }) {
+  const auth = getAuth(app);
+
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [ubicacion, setUbicacion] = useState('');
+  const [ubicacionTexto, setUbicacionTexto] = useState(''); // texto dirección legible
+  const [selectedLocation, setSelectedLocation] = useState(null); // coordenadas
   const [etiquetas, setEtiquetas] = useState('');
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const seleccionarImagen = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  // Pedir permisos para cámara y galería
+  const pedirPermisos = async () => {
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
+      Alert.alert('Permisos requeridos', 'Necesitamos permisos de cámara y galería.');
+      return false;
+    }
+    return true;
+  };
 
-    if (!result.canceled) {
-      setImagen(result.assets[0].uri);
+  const seleccionarImagen = async () => {
+    if (!(await pedirPermisos())) return;
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      if (!result.canceled) {
+        setImagen(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      Alert.alert('Error', 'No se pudo acceder a la galería.');
     }
   };
 
+  // Tomar foto con cámara
+  const tomarFoto = async () => {
+    if (!(await pedirPermisos())) return;
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      if (!result.canceled) {
+        setImagen(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo abrir la cámara.');
+    }
+  };
+
+  // Subir imagen a Cloudinary
   const subirImagen = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const filename = `reportes/${Date.now()}.jpg`;
-    const storageRef = ref(storage, filename);
-    await uploadBytes(storageRef, blob);
-    const url = await getDownloadURL(storageRef);
-    return url;
+    const data = new FormData();
+    data.append('file', {
+      uri,
+      type: 'image/jpeg',
+      name: 'reporte.jpg',
+    });
+    data.append('upload_preset', 'report');
+    data.append('cloud_name', 'dcsa4u3cj');
+
+    try {
+      const res = await fetch('https://api.cloudinary.com/v1_1/dcsa4u3cj/image/upload', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await res.json();
+      if (result.secure_url) {
+        return result.secure_url;
+      } else {
+        throw new Error('No se obtuvo la URL de Cloudinary');
+      }
+    } catch (error) {
+      console.error('Error subiendo a Cloudinary:', error);
+      throw error;
+    }
+  };
+
+  const handleLocationSelected = async (location) => {
+    setSelectedLocation(location);
+
+    try {
+      const [geoInfo] = await Location.reverseGeocodeAsync({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+
+      if (geoInfo) {
+        const dir = `${geoInfo.name || ''} ${geoInfo.street || ''}, ${geoInfo.city || ''}, ${geoInfo.region || ''}, ${geoInfo.country || ''}`.trim();
+        setUbicacionTexto(dir);
+      }
+    } catch (error) {
+      console.warn('Error reverse geocoding:', error);
+      setUbicacionTexto('');
+    }
   };
 
   const publicarReporte = async () => {
-    if (!titulo || !descripcion || !ubicacion) {
+    if (!titulo || !descripcion || !selectedLocation) {
       Alert.alert('Error', 'Por favor, completa todos los campos obligatorios.');
       return;
     }
@@ -56,14 +132,16 @@ export default function CreateReport({ navigation }) {
       await addDoc(collection(db, 'reportes'), {
         titulo,
         descripcion,
-        ubicacion,
+        ubicacion: selectedLocation, 
+        direccion: ubicacionTexto,    
         etiquetas: etiquetas.split(',').map(e => e.trim()),
         imagenURL,
         creadoEn: serverTimestamp(),
+        userId: auth.currentUser.uid,
       });
 
       Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
-      navigation.navigate('Feed'); // o cualquier otra pantalla
+      navigation.navigate('Feed');
     } catch (error) {
       console.error('Error al publicar:', error);
       Alert.alert('Error', 'No se pudo guardar el reporte.');
@@ -74,6 +152,7 @@ export default function CreateReport({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
       <Text style={styles.title}>Crear nuevo reporte</Text>
 
       <TextInput
@@ -83,13 +162,16 @@ export default function CreateReport({ navigation }) {
         onChangeText={setTitulo}
       />
 
-      <TouchableOpacity style={styles.imagePicker} onPress={seleccionarImagen}>
-        {imagen ? (
-          <Image source={{ uri: imagen }} style={styles.image} />
-        ) : (
-          <Text style={styles.imagePlaceholder}>Seleccionar imagen</Text>
-        )}
-      </TouchableOpacity>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.imageBtn} onPress={seleccionarImagen}>
+          <Text style={styles.imageBtnText}>📁 Galería</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.imageBtn} onPress={tomarFoto}>
+          <Text style={styles.imageBtnText}>📷 Cámara</Text>
+        </TouchableOpacity>
+      </View>
+
+      {imagen && <Image source={{ uri: imagen }} style={styles.image} />}
 
       <TextInput
         style={[styles.input, { height: 100 }]}
@@ -99,11 +181,12 @@ export default function CreateReport({ navigation }) {
         onChangeText={setDescripcion}
       />
 
+      {/* Mostrar la dirección legible pero no editable */}
       <TextInput
         style={styles.input}
-        placeholder="Ubicación"
-        value={ubicacion}
-        onChangeText={setUbicacion}
+        placeholder="Ubicación seleccionada"
+        value={ubicacionTexto}
+        editable={false}
       />
 
       <TextInput
@@ -111,6 +194,12 @@ export default function CreateReport({ navigation }) {
         placeholder="Etiquetas (separadas por comas)"
         value={etiquetas}
         onChangeText={setEtiquetas}
+      />
+
+      {/* Selector de ubicación con mapa */}
+      <UbicationSelector
+        onLocationSelected={handleLocationSelected}
+        style={{ height: 300, marginVertical: 10 }}
       />
 
       <TouchableOpacity style={styles.button} onPress={publicarReporte} disabled={loading}>
@@ -131,12 +220,15 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#ccc', padding: 10,
     borderRadius: 8, marginBottom: 12
   },
-  imagePicker: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
-    height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 12
+  buttonRow: {
+    flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12
   },
-  imagePlaceholder: { color: '#999' },
-  image: { width: '100%', height: '100%', borderRadius: 8 },
+  imageBtn: {
+    flex: 1, backgroundColor: '#ddd', padding: 10,
+    borderRadius: 8, marginHorizontal: 5, alignItems: 'center'
+  },
+  imageBtnText: { color: '#333' },
+  image: { width: '100%', height: 200, borderRadius: 8, marginBottom: 12 },
   button: {
     backgroundColor: '#2c4d4e', padding: 15,
     borderRadius: 8, alignItems: 'center', marginTop: 10
