@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Share } from 'react-native';
-import { FAB } from 'react-native-paper';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { app } from '../config/firebaseConfig';
@@ -19,6 +18,9 @@ export default function Feed() {
         description: doc.data().descripcion,
         image: doc.data().imagenURL,
         comments: doc.data().comentarios || [],
+        user: doc.data().nombreUsuario || 'Anónimo',
+        direccion: doc.data().direccion || 'Ubicación no disponible',
+        etiquetas: doc.data().etiquetas || [],
       }));
       setReportes(data);
     });
@@ -40,33 +42,51 @@ export default function Feed() {
     Alert.alert('Publicación reportada', `Has reportado: ${title}`);
   };
 
-  const renderPost = ({ item }) => (
-    <View style={styles.post}>
-      {item.image ? (
-        <Image source={{ uri: item.image }} style={styles.image} />
-      ) : null}
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+  const goToDetail = (reporte) => {
+    navigation.navigate('ReportDetail', { reporte });
+  };
 
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
-          <Text style={styles.actionText}>📤 Compartir</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleReport(item.title)}>
-          <Text style={[styles.actionText, { color: 'red' }]}>🚩 Reportar</Text>
-        </TouchableOpacity>
-      </View>
+  const renderPost = ({ item }) => {
+    const direccionRecortada = item.direccion.length > 50
+      ? item.direccion.slice(0, 50) + '...'
+      : item.direccion;
 
-      {item.comments?.length > 0 && (
-        <View style={styles.comments}>
-          <Text style={styles.commentsTitle}>Comentarios:</Text>
-          {item.comments.map((comment, index) => (
-            <Text key={index} style={styles.comment}>• {comment}</Text>
-          ))}
+    return (
+      <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
+        <Text style={styles.user}>👤 {item.user}</Text>
+
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.image} />
+        )}
+
+        <TouchableOpacity onPress={() => navigation.navigate('ReportDetail', { reporte: item })}>
+          <Text style={styles.title}>{item.title}</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.description}>{item.description}</Text>
+
+        <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
+
+        {item.etiquetas.length > 0 && (
+          <View style={styles.etiquetasContainer}>
+            {item.etiquetas.map((etiqueta, index) => (
+              <Text key={index} style={styles.etiqueta}>#{etiqueta}</Text>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
+            <Text style={styles.actionText}>📤 Compartir</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleReport(item.title)}>
+            <Text style={styles.actionText}>🚩 Reportar</Text>
+          </TouchableOpacity>
         </View>
-      )}
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -76,13 +96,6 @@ export default function Feed() {
         renderItem={renderPost}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún</Text>}
-      />
-
-      <FAB
-        style={styles.fab}
-        icon="plus"
-        label="Nuevo"
-        onPress={() => navigation.navigate('CreateReport')}
       />
     </View>
   );
@@ -101,16 +114,42 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: 200, borderRadius: 10 },
   title: { fontSize: 18, fontWeight: 'bold', marginTop: 10 },
   description: { fontSize: 16, marginVertical: 5 },
-  actions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-  actionText: { fontSize: 14, color: '#007BFF' },
-  comments: { marginTop: 10 },
-  commentsTitle: { fontWeight: 'bold', marginBottom: 5 },
-  comment: { fontSize: 14, marginLeft: 10 },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 16,
+  direccion: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+    fontStyle: 'italic',
+  },
+  user: {
+    fontSize: 14,
+    color: '#444',
+    marginBottom: 5,
+    fontStyle: 'italic',
+  },
+  etiquetasContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  etiqueta: {
     backgroundColor: '#007BFF',
+    color: '#fff',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 8,
+    marginBottom: 5,
+    borderRadius: 15,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  actionText: {
+    fontSize: 14,
+    color: '#007BFF',
   },
   empty: {
     textAlign: 'center',

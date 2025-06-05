@@ -138,6 +138,8 @@ export default function CreateReport({ navigation }) {
         imagenURL,
         creadoEn: serverTimestamp(),
         userId: auth.currentUser.uid,
+        nombreUsuario: auth.currentUser.displayName || 'Sin nombre', 
+
       });
 
       Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
