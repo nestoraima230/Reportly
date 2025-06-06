@@ -6,17 +6,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { auth, db } from '../config/firebaseConfig';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 
 export default function EditProfile() {
   const [username, setUsername] = useState('');
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const user = auth.currentUser;
 
@@ -41,7 +43,7 @@ export default function EditProfile() {
     };
 
     cargarDatos();
-  }, []);
+  }, [user]);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -68,20 +70,41 @@ export default function EditProfile() {
       return;
     }
 
+    setLoading(true);
+    
     try {
       const userDocRef = doc(db, 'usuarios', user.uid);
-
+      
+      // 1. Actualizar el documento del usuario
       await updateDoc(userDocRef, {
         username,
         address,
         profileImage: profileImage || '',
       });
 
-      Alert.alert('Perfil actualizado', 'Los cambios se han guardado correctamente');
+      // 2. Actualizar todos los reportes del usuario
+      const q = query(
+        collection(db, 'reportes'), 
+        where('userId', '==', user.uid)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const batch = writeBatch(db);
+      
+      querySnapshot.forEach((doc) => {
+        const reportRef = doc.ref;
+        batch.update(reportRef, { nombreUsuario: username });
+      });
+      
+      await batch.commit();
+
+      Alert.alert('Éxito', 'Perfil y reportes actualizados correctamente');
       navigation.goBack();
     } catch (error) {
-      console.error('Error al actualizar el perfil:', error);
-      Alert.alert('Error', 'No se pudo guardar los cambios');
+      console.error('Error al actualizar:', error);
+      Alert.alert('Error', 'No se pudieron guardar todos los cambios');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,6 +125,7 @@ export default function EditProfile() {
         style={styles.input}
         value={username}
         onChangeText={setUsername}
+        editable={!loading}
       />
 
       <TextInput
@@ -109,10 +133,19 @@ export default function EditProfile() {
         style={styles.input}
         value={address}
         onChangeText={setAddress}
+        editable={!loading}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Guardar Cambios</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.disabledButton]} 
+        onPress={handleSave}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Guardar Cambios</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -148,6 +181,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+  },
+  disabledButton: {
+    backgroundColor: '#a0a0a0',
   },
   buttonText: { color: '#fff', fontSize: 16 },
 });
