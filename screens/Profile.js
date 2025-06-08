@@ -90,7 +90,7 @@ export default function ProfileScreen() {
           <Image source={{ uri: item.image }} style={styles.postImage} />
         )}
         contentContainerStyle={styles.posts}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#888' }}>Sin publicaciones</Text>}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#888' }}></Text>}
       />
     </View>
   );

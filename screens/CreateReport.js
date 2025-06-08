@@ -10,18 +10,39 @@ import { getAuth } from 'firebase/auth';
 import { app, db } from '../config/firebaseConfig';
 import UbicationSelector from '../utils/ubicationSelector';
 
+// Función para obtener la colonia con Nominatim
+const obtenerColonia = async (lat, lon) => {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+    );
+    const data = await response.json();
+
+    return (
+      address.suburb ||
+      address.neighbourhood ||
+      address.village ||
+      address.hamlet ||
+      address.road ||
+      "Desconocida"
+    );
+  } catch (error) {
+    console.error('Error obteniendo colonia:', error);
+    return 'Desconocido';
+  }
+};
+
 export default function CreateReport({ navigation }) {
   const auth = getAuth(app);
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [ubicacionTexto, setUbicacionTexto] = useState(''); // texto dirección legible
-  const [selectedLocation, setSelectedLocation] = useState(null); // coordenadas
+  const [ubicacionTexto, setUbicacionTexto] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [etiquetas, setEtiquetas] = useState('');
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Pedir permisos para cámara y galería
   const pedirPermisos = async () => {
     const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
     const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -50,7 +71,6 @@ export default function CreateReport({ navigation }) {
     }
   };
 
-  // Tomar foto con cámara
   const tomarFoto = async () => {
     if (!(await pedirPermisos())) return;
     try {
@@ -68,7 +88,6 @@ export default function CreateReport({ navigation }) {
     }
   };
 
-  // Subir imagen a Cloudinary
   const subirImagen = async (uri) => {
     const data = new FormData();
     data.append('file', {
@@ -98,7 +117,6 @@ export default function CreateReport({ navigation }) {
 
   const handleLocationSelected = async (location) => {
     setSelectedLocation(location);
-
     try {
       const [geoInfo] = await Location.reverseGeocodeAsync({
         latitude: location.latitude,
@@ -129,17 +147,22 @@ export default function CreateReport({ navigation }) {
         imagenURL = await subirImagen(imagen);
       }
 
+      const colonia = await obtenerColonia(
+        selectedLocation.latitude,
+        selectedLocation.longitude
+      );
+
       await addDoc(collection(db, 'reportes'), {
         titulo,
         descripcion,
-        ubicacion: selectedLocation, 
-        direccion: ubicacionTexto,    
+        ubicacion: selectedLocation,
+        direccion: ubicacionTexto,
+        colonia, // ✅ Se guarda la colonia
         etiquetas: etiquetas.split(',').map(e => e.trim()),
         imagenURL,
         creadoEn: serverTimestamp(),
         userId: auth.currentUser.uid,
-        nombreUsuario: auth.currentUser.displayName || 'Sin nombre', 
-
+        nombreUsuario: auth.currentUser.displayName || 'Sin nombre',
       });
 
       Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
@@ -154,7 +177,6 @@ export default function CreateReport({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       <Text style={styles.title}>Crear nuevo reporte</Text>
 
       <TextInput
@@ -183,7 +205,6 @@ export default function CreateReport({ navigation }) {
         onChangeText={setDescripcion}
       />
 
-      {/* Mostrar la dirección legible pero no editable */}
       <TextInput
         style={styles.input}
         placeholder="Ubicación seleccionada"
@@ -198,7 +219,6 @@ export default function CreateReport({ navigation }) {
         onChangeText={setEtiquetas}
       />
 
-      {/* Selector de ubicación con mapa */}
       <UbicationSelector
         onLocationSelected={handleLocationSelected}
         style={{ height: 300, marginVertical: 10 }}

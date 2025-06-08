@@ -9,25 +9,36 @@ import {
 import { auth } from "./firebaseConfig";
 
 export const registerWithEmail = async (email, password, name) => {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-  if (user && name) {
-    await updateProfile(user, { displayName: name });
+    const user = userCredential.user;
+    
+    if (user && name) {
+      await updateProfile(user, { displayName: name });
+    }
+
+    console.log(`✅ Registro exitoso: ${user.displayName || name} (${user.email})`);
+
+    return userCredential;  
+  } catch (error) {
+    console.error("Error al registrar usuario:", error);
+    throw error;  
   }
-
-  console.log(`✅ Registro exitoso: ${user.displayName || name} (${user.email})`);
-
-  return user;
 };
 
 export const loginWithEmail = async (email, password) => {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-  console.log(`✅ Inicio de sesión exitoso: ${user.displayName || "Usuario"} (${user.email})`);
+    console.log(`✅ Inicio de sesión exitoso: ${user.displayName || "Usuario"} (${user.email})`);
 
-  return user;
+    return user;
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    throw error;
+  }
 };
 
 export const logout = async () => {

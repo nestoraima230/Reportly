@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation }) {
           const profile = userDoc.data();
           console.log('Perfil cargado:', profile);
           Alert.alert("Bienvenido", `Hola, ${profile.username}`);
-          navigation.navigate('Profile', { profile });
+          //navigation.navigate('Profile', { profile });
         } else {
           console.log('No se encontró el documento del usuario');
           Alert.alert('Error', 'No se encontraron datos del perfil.');

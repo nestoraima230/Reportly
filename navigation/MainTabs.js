@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Feed from '../screens/Feed';
 import ProfileStack from './ProfileStack';
-import Dashboard from '../screens/Dashboard'; // asegúrate de que el nombre del archivo tenga mayúscula inicial
+import Dashboard from '../screens/Dashboard'; 
 import CreateReport from '../screens/CreateReport';
 import { Ionicons } from '@expo/vector-icons';
 
