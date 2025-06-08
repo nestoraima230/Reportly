@@ -51,7 +51,6 @@ const handleRegister = async () => {
       const userCredential = await registerWithEmail(email, password, fullName);
       const user = userCredential.user;
 
-      // Crear documento en Firestore con UID del usuario
       await setDoc(doc(db, 'usuarios', user.uid), {
         username: fullName,
         profileImage: '',

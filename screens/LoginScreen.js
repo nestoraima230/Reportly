@@ -41,7 +41,6 @@ export default function LoginScreen({ navigation }) {
         if (userDoc.exists()) {
           const profile = userDoc.data();
           console.log('Perfil cargado:', profile);
-          Alert.alert("Bienvenido", `Hola, ${profile.username}`);
           //navigation.navigate('Profile', { profile });
         } else {
           console.log('No se encontró el documento del usuario');

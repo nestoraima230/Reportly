@@ -10,23 +10,28 @@ export default function Feed() {
   const [reportes, setReportes] = useState([]);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'reportes'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
+useEffect(() => {
+  const unsubscribe = onSnapshot(collection(db, 'reportes'), (snapshot) => {
+    const data = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return {
         id: doc.id,
-        title: doc.data().titulo,
-        description: doc.data().descripcion,
-        image: doc.data().imagenURL,
-        comments: doc.data().comentarios || [],
-        user: doc.data().nombreUsuario || 'Anónimo',
-        direccion: doc.data().direccion || 'Ubicación no disponible',
-        etiquetas: doc.data().etiquetas || [],
-      }));
-      setReportes(data);
+        title: d.titulo,
+        description: d.descripcion,
+        image: d.imagenURL,
+        comments: d.comentarios || [],
+        user: d.nombreUsuario || 'Anónimo',
+        direccion: d.direccion || 'Ubicación no disponible',
+        etiquetas: d.etiquetas || [],
+        creadoEn: d.creadoEn?.toDate() || null, // ← Agregado aquí
+      };
     });
+    setReportes(data);
+  });
 
-    return () => unsubscribe();
-  }, []);
+  return () => unsubscribe();
+}, []);
+
 
   const handleShare = async (title, description) => {
     try {
@@ -46,47 +51,65 @@ export default function Feed() {
     navigation.navigate('ReportDetail', { reporte });
   };
 
-  const renderPost = ({ item }) => {
-    const direccionRecortada = item.direccion.length > 50
-      ? item.direccion.slice(0, 50) + '...'
-      : item.direccion;
+const renderPost = ({ item }) => {
+  const direccionRecortada = item.direccion.length > 50
+    ? item.direccion.slice(0, 50) + '...'
+    : item.direccion;
 
-    return (
-      <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
-        <Text style={styles.user}>👤 {item.user}</Text>
+  return (
+    <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
+      {/* Usuario */}
+      <Text style={styles.user}>👤 {item.user}</Text>
 
-        {item.image && (
-          <Image source={{ uri: item.image }} style={styles.image} />
-        )}
+      {/* Fecha de publicación */}
+      {item.creadoEn && (
+        <Text style={styles.fecha}>
+          🕒 {item.creadoEn.toLocaleString('es-MX', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+          })}
+        </Text>
+      )}
 
-        <TouchableOpacity onPress={() => navigation.navigate('ReportDetail', { reporte: item })}>
-          <Text style={styles.title}>{item.title}</Text>
+      {/* Imagen */}
+      {item.image && (
+        <Image source={{ uri: item.image }} style={styles.image} />
+      )}
+
+      {/* Título */}
+      <TouchableOpacity onPress={() => navigation.navigate('ReportDetail', { reporte: item })}>
+        <Text style={styles.title}>{item.title}</Text>
+      </TouchableOpacity>
+
+      {/* Descripción */}
+      <Text style={styles.description}>{item.description}</Text>
+
+      {/* Dirección */}
+      <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
+
+      {/* Etiquetas */}
+      {item.etiquetas.length > 0 && (
+        <View style={styles.etiquetasContainer}>
+          {item.etiquetas.map((etiqueta, index) => (
+            <Text key={index} style={styles.etiqueta}>#{etiqueta}</Text>
+          ))}
+        </View>
+      )}
+
+      {/* Acciones */}
+      <View style={styles.actions}>
+        <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
+          <Text style={styles.actionText}>📤 Compartir</Text>
         </TouchableOpacity>
 
-        <Text style={styles.description}>{item.description}</Text>
+        <TouchableOpacity onPress={() => handleReport(item.title)}>
+          <Text style={styles.actionText}>🚩 Reportar</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
-        <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
-
-        {item.etiquetas.length > 0 && (
-          <View style={styles.etiquetasContainer}>
-            {item.etiquetas.map((etiqueta, index) => (
-              <Text key={index} style={styles.etiqueta}>#{etiqueta}</Text>
-            ))}
-          </View>
-        )}
-
-        <View style={styles.actions}>
-          <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
-            <Text style={styles.actionText}>📤 Compartir</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => handleReport(item.title)}>
-            <Text style={styles.actionText}>🚩 Reportar</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <View style={styles.container}>
@@ -131,6 +154,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 10,
   },
+fecha: {
+  fontSize: 12,
+  color: '#777',
+  marginBottom: 5,
+  fontStyle: 'italic',
+},
+
   etiqueta: {
     backgroundColor: '#007BFF',
     color: '#fff',

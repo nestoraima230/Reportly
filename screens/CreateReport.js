@@ -10,20 +10,24 @@ import { getAuth } from 'firebase/auth';
 import { app, db } from '../config/firebaseConfig';
 import UbicationSelector from '../utils/ubicationSelector';
 
-// Función para obtener la colonia con Nominatim
+// Obtener colonia desde Nominatim (OpenStreetMap)
 const obtenerColonia = async (lat, lon) => {
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
     );
     const data = await response.json();
+    const address = data.address;
 
     return (
       address.suburb ||
       address.neighbourhood ||
       address.village ||
       address.hamlet ||
-      address.road ||
+      address.residential ||
+      address.city_district ||  
+      address.road ||           
+      address.city ||
       "Desconocida"
     );
   } catch (error) {
@@ -157,10 +161,10 @@ export default function CreateReport({ navigation }) {
         descripcion,
         ubicacion: selectedLocation,
         direccion: ubicacionTexto,
-        colonia, // ✅ Se guarda la colonia
+        colonia,
         etiquetas: etiquetas.split(',').map(e => e.trim()),
         imagenURL,
-        creadoEn: serverTimestamp(),
+        creadoEn: serverTimestamp(), // ✅ Campo de fecha y hora
         userId: auth.currentUser.uid,
         nombreUsuario: auth.currentUser.displayName || 'Sin nombre',
       });
