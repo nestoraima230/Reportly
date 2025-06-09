@@ -28,7 +28,7 @@ const obtenerColonia = async (lat, lon) => {
       address.city_district ||  
       address.road ||           
       address.city ||
-      "Desconocida"
+      "Desconocido"
     );
   } catch (error) {
     console.error('Error obteniendo colonia:', error);

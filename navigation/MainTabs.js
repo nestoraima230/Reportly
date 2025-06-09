@@ -21,15 +21,6 @@ export default function MainTabs({ user }) {
         }}
       />
       <Tab.Screen
-        name="Dashboard"
-        component={Dashboard}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Create"
         options={{
           tabBarIcon: ({ color, size }) => (
