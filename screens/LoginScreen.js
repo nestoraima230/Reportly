@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { loginWithEmail } from '../config/firebaseAuthService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
@@ -8,21 +8,26 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const db = getFirestore(app);
 
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
 
-    if (!email) {
+    if (!trimmedEmail) {
       newErrors.email = 'El correo electrónico es obligatorio';
-    } else if (!emailRegex.test(email)) {
+    } else if (!emailRegex.test(trimmedEmail)) {
       newErrors.email = 'Correo electrónico inválido';
     }
 
-    if (!password) {
+    if (!trimmedPassword) {
       newErrors.password = 'La contraseña es obligatoria';
+    } else if (trimmedPassword.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
     setErrors(newErrors);
@@ -31,24 +36,25 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (validateForm()) {
+      setLoading(true);
       try {
-        const user = await loginWithEmail(email, password);
+        const user = await loginWithEmail(email.trim(), password.trim());
 
-        // Obtener los datos del perfil desde Firestore
         const userDocRef = doc(db, 'usuarios', user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
           const profile = userDoc.data();
           console.log('Perfil cargado:', profile);
-          //navigation.navigate('Profile', { profile });
+          // navigation.navigate('Profile', { profile });
+          //Alert.alert('Inicio de sesión exitoso', `¡Bienvenido de nuevo, ${profile.username || 'usuario'}!`);
         } else {
-          console.log('No se encontró el documento del usuario');
           Alert.alert('Error', 'No se encontraron datos del perfil.');
         }
-
       } catch (error) {
         Alert.alert("Error al iniciar sesión", error.message);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -81,9 +87,13 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.forgotText}>¿Olvidaste la contraseña?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Iniciar sesión</Text>
-      </TouchableOpacity>
+      {loading ? (
+        <ActivityIndicator size="large" color="#2c4d4e" style={{ marginTop: 10 }} />
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Iniciar sesión</Text>
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.switchText}>
         ¿Eres nuevo?{' '}

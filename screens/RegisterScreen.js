@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { registerWithEmail } from '../config/firebaseAuthService';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
+import { serverTimestamp } from 'firebase/firestore';
+
 
 const db = getFirestore(app);
-
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -13,31 +14,42 @@ export default function RegisterScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
     const usernameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,40}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 
-    if (!fullName) {
+    const trimmedFullName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+
+    if (!trimmedFullName) {
       newErrors.fullName = 'El nombre es obligatorio';
-    } else if (!usernameRegex.test(fullName)) {
+    } else if (!usernameRegex.test(trimmedFullName)) {
       newErrors.fullName = 'Solo letras, máximo 40 caracteres, sin símbolos';
     }
 
-    if (!email) {
+    if (!trimmedEmail) {
       newErrors.email = 'El correo es obligatorio';
-    } else if (!emailRegex.test(email)) {
+    } else if (!emailRegex.test(trimmedEmail)) {
       newErrors.email = 'Correo inválido (ej. usuario@correo.com)';
     }
 
-    if (!password) {
+    if (!trimmedPassword) {
       newErrors.password = 'La contraseña es obligatoria';
+    } else if (trimmedPassword.length < 6) {
+      newErrors.password = 'Mínimo 6 caracteres';
+    } else if (!passwordRegex.test(trimmedPassword)) {
+      newErrors.password = 'Debe tener al menos una letra y un número';
     }
 
-    if (!confirmPassword) {
+    if (!trimmedConfirmPassword) {
       newErrors.confirmPassword = 'Debes confirmar la contraseña';
-    } else if (password !== confirmPassword) {
+    } else if (trimmedPassword !== trimmedConfirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
@@ -45,25 +57,29 @@ export default function RegisterScreen({ navigation }) {
     return Object.keys(newErrors).length === 0;
   };
 
-const handleRegister = async () => {
-  if (validateForm()) {
-    try {
-      const userCredential = await registerWithEmail(email, password, fullName);
-      const user = userCredential.user;
+  const handleRegister = async () => {
+    if (validateForm()) {
+      setLoading(true);
+      try {
+        const userCredential = await registerWithEmail(email.trim(), password.trim(), fullName.trim());
+        const user = userCredential.user;
 
-      await setDoc(doc(db, 'usuarios', user.uid), {
-        username: fullName,
-        profileImage: '',
-        address: '',
-        posts: []
-      });
+        await setDoc(doc(db, 'usuarios', user.uid), {
+          username: fullName.trim(),
+          profileImage: '',
+          address: '',
+          posts: [],
+          creadoEn: serverTimestamp(),
+        });
 
-      Alert.alert("Registro exitoso", `Bienvenido, ${fullName}`);
-    } catch (error) {
-      Alert.alert("Error al registrarse", error.message);
+        Alert.alert("Registro exitoso", `Bienvenido, ${fullName.trim()}`);
+      } catch (error) {
+        Alert.alert("Error al registrarse", error.message);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -105,9 +121,13 @@ const handleRegister = async () => {
       />
       {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Registrarse</Text>
-      </TouchableOpacity>
+      {loading ? (
+        <ActivityIndicator size="large" color="#2c4d4e" style={{ marginTop: 10 }} />
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Registrarse</Text>
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.switchText}>
         ¿Ya tienes una cuenta?{' '}
