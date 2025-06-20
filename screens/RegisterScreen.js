@@ -67,6 +67,7 @@ export default function RegisterScreen({ navigation }) {
         await setDoc(doc(db, 'usuarios', user.uid), {
           username: fullName.trim(),
           profileImage: '',
+          rol: 'user',
           address: '',
           posts: [],
           creadoEn: serverTimestamp(),

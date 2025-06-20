@@ -164,6 +164,7 @@ export default function CreateReport({ navigation }) {
         colonia,
         etiquetas: etiquetas.split(',').map(e => e.trim()),
         imagenURL,
+        estado: "pendiente",
         creadoEn: serverTimestamp(), // ✅ Campo de fecha y hora
         userId: auth.currentUser.uid,
         nombreUsuario: auth.currentUser.displayName || 'Sin nombre',

@@ -13,16 +13,28 @@ export default function ReportDetail({ route }) {
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>{report.title || 'Sin título'}</Text>
       <Text style={styles.user}>👤 {report.user || 'Anónimo'}</Text>
 
+      {report.estado && (
+        <Text style={[styles.estado,
+        report.estado === 'resuelto' ? styles.estadoResuelto :
+          report.estado === 'no_resuelto' ? styles.estadoNoResuelto :
+            styles.estadoPendiente
+        ]}>
+          Estado: {report.estado === 'resuelto' ? '✅ Resuelto' :
+            report.estado === 'no_resuelto' ? '❌ No Resuelto' : '🕒 Pendiente'}
+        </Text>
+      )}
+
+
       {report.image ? (
-        <Image 
-          source={{ uri: report.image }} 
+        <Image
+          source={{ uri: report.image }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -142,5 +154,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#555',
     lineHeight: 20
+  },
+
+  estado: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10
+  },
+  estadoResuelto: {
+    color: 'green'
+  },
+  estadoNoResuelto: {
+    color: 'red'
+  },
+  estadoPendiente: {
+    color: 'orange'
   }
 });

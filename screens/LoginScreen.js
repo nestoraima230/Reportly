@@ -9,6 +9,8 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
 
   const db = getFirestore(app);
 
@@ -42,10 +44,14 @@ export default function LoginScreen({ navigation }) {
 
         const userDocRef = doc(db, 'usuarios', user.uid);
         const userDoc = await getDoc(userDocRef);
+        const rol = userDoc.data()?.rol;
+
+        
 
         if (userDoc.exists()) {
           const profile = userDoc.data();
           console.log('Perfil cargado:', profile);
+          setUserRole(profile.rol);
           // navigation.navigate('Profile', { profile });
           //Alert.alert('Inicio de sesión exitoso', `¡Bienvenido de nuevo, ${profile.username || 'usuario'}!`);
         } else {
