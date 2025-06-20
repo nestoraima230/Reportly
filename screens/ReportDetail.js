@@ -1,43 +1,64 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, Button, Alert } from 'react-native';
+import { doc, updateDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
+import { AuthContext } from '../context/AuthContext'; // Asegúrate de tener este contexto
+
+const db = getFirestore(app);
 
 export default function ReportDetail({ route }) {
-  // Mejor manejo de parámetros con valores por defecto
+  const { userRole } = useContext(AuthContext); // Obtenemos el rol del usuario
+
   const report = route.params?.reporte || route.params?.report || {
     title: 'Reporte no disponible',
     user: 'Anónimo',
     description: 'No hay descripción proporcionada',
     direccion: 'Ubicación desconocida',
     etiquetas: [],
-    comments: []
+    comments: [],
+    id: null
+  };
+
+  const actualizarEstado = async (nuevoEstado) => {
+    try {
+      const reporteRef = doc(db, 'reportes', report.id);
+      await updateDoc(reporteRef, {
+        estado: nuevoEstado,
+        actualizadoEn: serverTimestamp()
+      });
+      Alert.alert('Éxito', `El reporte fue marcado como ${nuevoEstado}`);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo actualizar el estado.');
+    }
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>{report.title || 'Sin título'}</Text>
       <Text style={styles.user}>👤 {report.user || 'Anónimo'}</Text>
 
       {report.estado && (
-        <Text style={[styles.estado,
-        report.estado === 'resuelto' ? styles.estadoResuelto :
-          report.estado === 'no_resuelto' ? styles.estadoNoResuelto :
-            styles.estadoPendiente
-        ]}>
-          Estado: {report.estado === 'resuelto' ? '✅ Resuelto' :
-            report.estado === 'no_resuelto' ? '❌ No Resuelto' : '🕒 Pendiente'}
+        <Text
+          style={[
+            styles.estado,
+            report.estado === 'resuelto'
+              ? styles.estadoResuelto
+              : report.estado === 'no_resuelto'
+              ? styles.estadoNoResuelto
+              : styles.estadoPendiente
+          ]}
+        >
+          Estado:{' '}
+          {report.estado === 'resuelto'
+            ? '✅ Resuelto'
+            : report.estado === 'no_resuelto'
+            ? '❌ No Resuelto'
+            : '🕒 Pendiente'}
         </Text>
       )}
 
-
       {report.image ? (
-        <Image
-          source={{ uri: report.image }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: report.image }} style={styles.image} resizeMode="cover" />
       ) : (
         <View style={[styles.image, styles.noImage]}>
           <Text>No hay imagen</Text>
@@ -46,17 +67,20 @@ export default function ReportDetail({ route }) {
 
       <View style={styles.section}>
         <Text style={styles.label}>Descripción:</Text>
-        <Text style={styles.text}>
-          {report.description || 'No hay descripción disponible'}
-        </Text>
+        <Text style={styles.text}>{report.description || 'No hay descripción disponible'}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Dirección:</Text>
-        <Text style={styles.text}>
-          📍 {report.direccion || 'Ubicación no especificada'}
-        </Text>
+        <Text style={styles.text}>📍 {report.direccion || 'Ubicación no especificada'}</Text>
       </View>
+
+      {userRole === 'admin' && report.id && (
+        <View style={{ marginTop: 20 }}>
+          <Button title="Marcar como Resuelto" onPress={() => actualizarEstado('resuelto')} />
+          <Button title="Marcar como No Resuelto" onPress={() => actualizarEstado('no_resuelto')} />
+        </View>
+      )}
 
       {report.etiquetas?.length > 0 && (
         <View style={styles.section}>
@@ -155,7 +179,6 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 20
   },
-
   estado: {
     fontSize: 16,
     fontWeight: '600',

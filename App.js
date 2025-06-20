@@ -1,37 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native'; 
+import React, { useContext } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import AuthStack from './navigation/AuthStack';
 import AppStack from './navigation/AppStack';
-import { app } from './config/firebaseConfig';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 
-const auth = getAuth(app); 
-
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); 
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false); 
-    });
-
-    return () => unsubscribe();
-  }, []);
+function AppNavigator() {
+  const { user, loading } = useContext(AuthContext);
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text></Text>
+        <ActivityIndicator size="large" color="#2c4d4e" />
       </View>
     );
   }
 
   return (
     <NavigationContainer>
-        {user ? <AppStack user={user} /> : <AuthStack />}
+      {user ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }
