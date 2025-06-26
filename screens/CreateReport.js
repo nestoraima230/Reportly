@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Image, Alert, ScrollView, ActivityIndicator
@@ -9,6 +9,9 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { app, db } from '../config/firebaseConfig';
 import UbicationSelector from '../utils/ubicationSelector';
+import { useFocusEffect } from '@react-navigation/native';
+
+
 
 // Obtener colonia desde Nominatim (OpenStreetMap)
 const obtenerColonia = async (lat, lon) => {
@@ -46,6 +49,22 @@ export default function CreateReport({ navigation }) {
   const [etiquetas, setEtiquetas] = useState('');
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
+
+
+  const limpiarFormulario = () => {
+    setTitulo('');
+    setDescripcion('');
+    setUbicacionTexto('');
+    setImagen(null);
+    setEtiquetas('');
+    setSelectedLocation(null);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      limpiarFormulario();
+    }, [])
+  );
 
   const pedirPermisos = async () => {
     const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
@@ -165,7 +184,7 @@ export default function CreateReport({ navigation }) {
         etiquetas: etiquetas.split(',').map(e => e.trim()),
         imagenURL,
         estado: "pendiente",
-        creadoEn: serverTimestamp(), // ✅ Campo de fecha y hora
+        creadoEn: serverTimestamp(), 
         userId: auth.currentUser.uid,
         nombreUsuario: auth.currentUser.displayName || 'Sin nombre',
       });
