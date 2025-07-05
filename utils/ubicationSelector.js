@@ -3,9 +3,9 @@ import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 
-const UbicationSelector = ({ onLocationSelected, style }) => {
+const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
   const [location, setLocation] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [mapLocation, setMapLocation] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
 
   const defaultLocation = {
@@ -46,13 +46,20 @@ const UbicationSelector = ({ onLocationSelected, style }) => {
     getLocationPermission();
   }, []);
 
+  useEffect(() => {
+    if (selectedLocation === null) {
+      setMapLocation(null); 
+    }
+  }, [selectedLocation]);
+
+
   const handleMapPress = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     const newLocation = {
       latitude,
       longitude,
     };
-    setSelectedLocation(newLocation);
+    setMapLocation(newLocation);
     onLocationSelected(newLocation);
   };
 
@@ -75,8 +82,11 @@ const UbicationSelector = ({ onLocationSelected, style }) => {
         }}
         onPress={handleMapPress}
       >
-        {selectedLocation && (
-          <Marker title="Selected Location" coordinate={selectedLocation} />
+        {mapLocation  && (
+          <Marker title="Selected Location" coordinate={mapLocation} />
+        )}
+        {selectedLocation && !mapLocation && (
+          <Marker title="Current Location" coordinate={selectedLocation} />
         )}
       </MapView>
     </View>

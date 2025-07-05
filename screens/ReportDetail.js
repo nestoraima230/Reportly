@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Button, Alert } from 'react-native';
 import { doc, updateDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
-import { AuthContext } from '../context/AuthContext'; // Asegúrate de tener este contexto
+import { AuthContext } from '../context/AuthContext'; 
 
 const db = getFirestore(app);
 
 export default function ReportDetail({ route }) {
-  const { userRole } = useContext(AuthContext); // Obtenemos el rol del usuario
+  const { userRole } = useContext(AuthContext); 
 
   const report = route.params?.reporte || route.params?.report || {
     title: 'Reporte no disponible',

@@ -24,7 +24,7 @@ useEffect(() => {
         direccion: d.direccion || 'Ubicación no disponible',
         etiquetas: d.etiquetas || [],
         estado: d.estado,
-        creadoEn: d.creadoEn?.toDate() || null, // ← Agregado aquí
+        creadoEn: d.creadoEn?.toDate() || null, 
       };
     });
     setReportes(data);

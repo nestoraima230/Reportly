@@ -245,6 +245,7 @@ export default function CreateReport({ navigation }) {
 
       <UbicationSelector
         onLocationSelected={handleLocationSelected}
+        selectedLocation={selectedLocation}
         style={{ height: 300, marginVertical: 10 }}
       />
 
