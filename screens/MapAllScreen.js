@@ -49,8 +49,8 @@ export default function MapAllScreen() {
       style={styles.map}
       clusterColor="#2c4d4e"
       initialRegion={{
-        latitude: 19.4326,   // CDMX por default (puedo cambiarlo)
-        longitude: -99.1332,
+        latitude:  24.14231,    //La Paz, BCS
+        longitude: -110.31316,
         latitudeDelta: 0.4,
         longitudeDelta: 0.4,
       }}
