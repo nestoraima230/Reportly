@@ -25,6 +25,8 @@ useEffect(() => {
         etiquetas: d.etiquetas || [],
         estado: d.estado,
         creadoEn: d.creadoEn?.toDate() || null, 
+        ubicacion: d.ubicacion,
+
       };
     });
     setReportes(data);

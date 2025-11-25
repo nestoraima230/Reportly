@@ -1,13 +1,15 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Button, Alert, TouchableOpacity } from 'react-native';
 import { doc, updateDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
-import { AuthContext } from '../context/AuthContext'; 
+import { AuthContext } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 const db = getFirestore(app);
 
 export default function ReportDetail({ route }) {
-  const { userRole } = useContext(AuthContext); 
+  const { userRole } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const report = route.params?.reporte || route.params?.report || {
     title: 'Reporte no disponible',
@@ -16,7 +18,9 @@ export default function ReportDetail({ route }) {
     direccion: 'Ubicación desconocida',
     etiquetas: [],
     comments: [],
-    id: null
+    id: null,
+    latitude: null,
+    longitude: null
   };
 
   const actualizarEstado = async (nuevoEstado) => {
@@ -44,16 +48,16 @@ export default function ReportDetail({ route }) {
             report.estado === 'resuelto'
               ? styles.estadoResuelto
               : report.estado === 'no_resuelto'
-              ? styles.estadoNoResuelto
-              : styles.estadoPendiente
+                ? styles.estadoNoResuelto
+                : styles.estadoPendiente
           ]}
         >
           Estado:{' '}
           {report.estado === 'resuelto'
             ? '✅ Resuelto'
             : report.estado === 'no_resuelto'
-            ? '❌ No Resuelto'
-            : '🕒 Pendiente'}
+              ? '❌ No Resuelto'
+              : '🕒 Pendiente'}
         </Text>
       )}
 
@@ -73,6 +77,22 @@ export default function ReportDetail({ route }) {
       <View style={styles.section}>
         <Text style={styles.label}>Dirección:</Text>
         <Text style={styles.text}>📍 {report.direccion || 'Ubicación no especificada'}</Text>
+
+        {/* BOTÓN DE MAPA */}
+        {report.ubicacion?.latitude && report.ubicacion?.longitude && (
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={() =>
+              navigation.navigate('MapScreen', {
+                latitude: report.ubicacion.latitude,
+                longitude: report.ubicacion.longitude,
+              })
+            }
+          >
+            <Text style={styles.mapButtonText}>Ver en el mapa</Text>
+          </TouchableOpacity>
+        )}
+
       </View>
 
       {userRole === 'admin' && report.id && (
@@ -192,5 +212,17 @@ const styles = StyleSheet.create({
   },
   estadoPendiente: {
     color: 'orange'
+  },
+  mapButton: {
+    backgroundColor: '#2c4d4e',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  mapButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16
   }
 });

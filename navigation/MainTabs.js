@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Feed from '../screens/Feed';
 import ProfileStack from './ProfileStack';
-import Dashboard from '../screens/Dashboard'; 
+import MapAllScreen from '../screens/MapAllScreen'; 
 import CreateReport from '../screens/CreateReport';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,6 +20,17 @@ export default function MainTabs({ user }) {
           ),
         }}
       />
+      <Tab.Screen
+        name="Mapa"
+        component={MapAllScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map" size={size} color={color} />
+          ),
+          title: "Mapa",
+        }}
+      />
+
       <Tab.Screen
         name="Create"
         options={{
