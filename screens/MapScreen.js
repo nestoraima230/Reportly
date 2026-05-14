@@ -42,9 +42,9 @@ export default function MapScreen({ route }) {
         />
       </MapView>
 
-      <View style={styles.buttonContainer}>
+{/*       <View style={styles.buttonContainer}>
         <Button title="Abrir en Google Maps" onPress={openInMaps} />
-      </View>
+      </View> */}
     </View>
   );
 }

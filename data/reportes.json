@@ -1,0 +1,906 @@
+[
+  {
+    "_id": "06a51Nh493RBAQsGS8hr",
+    "userId": "ZvOSIyy6WjdXhmfwdZyhKMUS2wB2",
+    "colonia": "Calle Licenciado Antonio Álvarez Rico",
+    "etiquetas": [
+      "Arma"
+    ],
+    "nombreUsuario": "Fernando Fernández",
+    "direccion": "SN-S``CONALEP`` Licenciado Antonio Álvarez Rico, La Paz, Baja California Sur, México",
+    "ubicacion": {
+      "longitude": -110.32068338245153,
+      "latitude": 24.13290050675352
+    },
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749506097/xodqusidweftty8c4saj.jpg",
+    "descripcion": "Jesus Armando Paredes, alumno del Cbtis 62, se presentó con un armado a clases y amenazó al profesor",
+    "titulo": "Alumno armado",
+    "creadoEn": {
+      "_seconds": 1749506100,
+      "_nanoseconds": 14000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "0WagERqO2N4NckvTq0WJ",
+    "titulo": "Me lleva el arroyo cerca de la ley ayuda",
+    "descripcion": "Ayuda me lleva el arroyo",
+    "ubicacion": {
+      "latitude": 24.133890631043716,
+      "longitude": -110.29933031648397
+    },
+    "direccion": "5 de Febrero & Patriotismo , La Paz, Baja California Sur, México",
+    "colonia": "Calle Antonio Navarro",
+    "etiquetas": [
+      "Arroyo",
+      "Ley"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1764215780/icqrrcwe6psamdacch3o.jpg",
+    "estado": "pendiente",
+    "userId": "Dof8QF9zrbhH3ZzoVeooLfLB3dc2",
+    "nombreUsuario": "Juan barrera",
+    "creadoEn": {
+      "_seconds": 1764215782,
+      "_nanoseconds": 680000000
+    }
+  },
+  {
+    "_id": "1RcBQxAgz9Ld9Bg09Wqf",
+    "ubicacion": {
+      "latitude": 24.141071862407983,
+      "longitude": -110.30309077352285
+    },
+    "titulo": "Se busca este señor",
+    "nombreUsuario": "René Lazcano",
+    "direccion": "1156 Calle Hermenegildo Galeana, La Paz, Baja California Sur, México",
+    "descripcion": "Fue visto en contra esquina del modelorama Los Mangos, se presume que estuvo en estado de embriaguez ",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1750300516/ab0ieqccjrzogq7fev1f.jpg",
+    "userId": "2bxcHECWkHTDVE2gfiYrI9YShiL2",
+    "colonia": "Calle General Manuel Márquez de León",
+    "creadoEn": {
+      "_seconds": 1750300518,
+      "_nanoseconds": 3000000
+    },
+    "etiquetas": [
+      "Alcoholismo",
+      "Búsqueda"
+    ],
+    "estado": "pendiente"
+  },
+  {
+    "_id": "3A0t4KOHDDD78quuPp5K",
+    "descripcion": "Gente senderista\n",
+    "userId": "gelQ0jdG4pOywRWTcg0p9XkM5l63",
+    "direccion": "470 Ignacio Ramírez, La Paz, Baja California Sur, México",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749517657/fphmm8y2haihlqvt82ua.jpg",
+    "nombreUsuario": "Italia",
+    "colonia": "Calle Oaxaca",
+    "ubicacion": {
+      "longitude": -110.32521095126867,
+      "latitude": 24.141926693045036
+    },
+    "titulo": "Viaje",
+    "etiquetas": [
+      "Senderista"
+    ],
+    "creadoEn": {
+      "_seconds": 1749517659,
+      "_nanoseconds": 313000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "6m9TdHnyukgNRHuIjzKp",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749359755/mnhsh97ymgjc8ucnxabx.jpg",
+    "descripcion": "Incendio de basura ilegal en el esterito",
+    "direccion": "430 Guillermo Prieto, La Paz, Baja California Sur, México",
+    "nombreUsuario": "Armando casas Blancas",
+    "etiquetas": [
+      "Incendio"
+    ],
+    "userId": "KP7k2mMdlAQQTjiD2bgWTyNWJ8z1",
+    "colonia": "Esterito",
+    "ubicacion": {
+      "longitude": -110.30513796955347,
+      "latitude": 24.167659190917938
+    },
+    "titulo": "Incendio!!!!",
+    "creadoEn": {
+      "_seconds": 1749359756,
+      "_nanoseconds": 696000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "7ZDdQV37cxJvrdffD0A5",
+    "titulo": "Me encontré una tarjeta de tiburón tirada afuera del anexo ",
+    "descripcion": "Le contaré esta tarjeta de tiburón afuera de un anexo si conoces a la persona comunícate al número +52 612 246 6585, los padrinos lo andan buscando al tazo dorado",
+    "ubicacion": {
+      "latitude": 24.136487711898596,
+      "longitude": -110.32270949786944
+    },
+    "direccion": "Calle Colima 955 Calle Colima, La Paz, B.C.S., México",
+    "etiquetas": [
+      "Encontré",
+      "anexo",
+      "búsqueda"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749331602/xaxygvjh5zltvhjnbeta.jpg",
+    "userId": "lpM8jhkudXal063JlcT4qVKl8B43",
+    "nombreUsuario": "Humberto XD",
+    "creadoEn": {
+      "_seconds": 1749331605,
+      "_nanoseconds": 286000000
+    },
+    "colonia": "Pueblo Nuevo",
+    "estado": "no_resuelto",
+    "actualizadoEn": {
+      "_seconds": 1751143643,
+      "_nanoseconds": 794000000
+    }
+  },
+  {
+    "_id": "AlvC5W6NN6R6HuGMeiZ5",
+    "colonia": "Calle General Manuel Márquez de León",
+    "ubicacion": {
+      "latitude": 24.14170824366934,
+      "longitude": -110.30414655804634
+    },
+    "imagenURL": "",
+    "userId": "cdwoAzqLR8Z9579Fs1ClSQEOxqs1",
+    "descripcion": "Alumbrado defectuoso en la esquina del lorygil de la padre Kino ",
+    "titulo": "Alumbrado defectuoso ",
+    "etiquetas": [
+      "Alumbrado"
+    ],
+    "nombreUsuario": "Alvaro Alvarado",
+    "direccion": "2360-C Boulevard Padre Eusebio Kino, La Paz, Baja California Sur, México",
+    "creadoEn": {
+      "_seconds": 1749609273,
+      "_nanoseconds": 336000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "CYL22VZ5V1GXlr1Z7Woy",
+    "ubicacion": {
+      "latitude": 24.167089929051027,
+      "longitude": -110.30382670462132
+    },
+    "titulo": "Acosador potencial!!!!",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749509723/ihqfwhjyerc0nfs7qxss.jpg",
+    "colonia": "Esterito",
+    "nombreUsuario": "Fernando Fernández",
+    "userId": "ZvOSIyy6WjdXhmfwdZyhKMUS2wB2",
+    "descripcion": "Este vato es grumer",
+    "direccion": "550 Vicente Guerrero, La Paz, Baja California Sur, México",
+    "etiquetas": [
+      "Acoso",
+      "Abuso"
+    ],
+    "creadoEn": {
+      "_seconds": 1749509725,
+      "_nanoseconds": 173000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "DCB1nMMJaNdwd25nlCvY",
+    "titulo": "Señor",
+    "descripcion": "Señor",
+    "ubicacion": {
+      "latitude": 24.148571781357795,
+      "longitude": -110.31439561396837
+    },
+    "direccion": "1162 General Manuel Márquez de León, La Paz, Baja California Sur, México",
+    "etiquetas": [
+      "Vandalismo"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749244725/ljmoecz06f0dgapn67qr.jpg",
+    "userId": "JXmCIZN1ZnfKe2x2Gi0yfhTfH7O2",
+    "nombreUsuario": "Juana del agua ",
+    "creadoEn": {
+      "_seconds": 1749244727,
+      "_nanoseconds": 787000000
+    },
+    "colonia": "Centro",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "DTEIWg1vbRQrooiQfJq7",
+    "titulo": "Ujkjjjy",
+    "descripcion": "Hhhh",
+    "ubicacion": {
+      "latitude": 24.105976653397335,
+      "longitude": -110.31878236681223
+    },
+    "direccion": "2724 Zafiro, La Paz, Baja California Sur, México",
+    "colonia": "La Paz",
+    "etiquetas": [
+      "Robo"
+    ],
+    "imagenURL": "",
+    "userId": "2bxcHECWkHTDVE2gfiYrI9YShiL2",
+    "nombreUsuario": "René Lazcano",
+    "creadoEn": {
+      "_seconds": 1762472532,
+      "_nanoseconds": 860000000
+    }
+  },
+  {
+    "_id": "EIkEOT9noXZ3z407T7IV",
+    "descripcion": "Un barco se quemo\n",
+    "userId": "gelQ0jdG4pOywRWTcg0p9XkM5l63",
+    "etiquetas": [
+      "Playa",
+      "Contaminación"
+    ],
+    "titulo": "Playa contaminada",
+    "direccion": "3 Tarsi, La Paz, Baja California Sur, México",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749517352/pw1wsn76jbhq37hexcdt.jpg",
+    "nombreUsuario": "Italia",
+    "ubicacion": {
+      "latitude": 24.099836175301807,
+      "longitude": -110.31111359596252
+    },
+    "colonia": "Boulevard Forjadores de Sudcalifornia",
+    "creadoEn": {
+      "_seconds": 1749517353,
+      "_nanoseconds": 559000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "HizMwlxfXDN0qaW5TEOD",
+    "titulo": "Hombre maltrata a gatito",
+    "descripcion": "Este hdsptm pateó un gato en el malecón de la paz, favor de reportarlo",
+    "ubicacion": {
+      "latitude": 24.15531074730823,
+      "longitude": -110.32259747385979
+    },
+    "direccion": "76 Paseo Álvaro Obregón, La Paz, Baja California Sur, México",
+    "colonia": "Paseo Álvaro Obregón",
+    "etiquetas": [
+      "Maltrato"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1750957590/xo7vednroewrommsts1i.jpg",
+    "estado": "pendiente",
+    "userId": "jW6ueURgPOhr6kOyremaqpx2i9l1",
+    "nombreUsuario": "Alvarado Alvarado",
+    "creadoEn": {
+      "_seconds": 1750957592,
+      "_nanoseconds": 496000000
+    }
+  },
+  {
+    "_id": "I9S8Acw9VgahTkFvKTD6",
+    "titulo": "Dealer en la UABCS",
+    "descripcion": "Persona sospechosa de venta de drogas en las cercanías de la UABCS ",
+    "ubicacion": {
+      "latitude": 24.102295278702304,
+      "longitude": -110.31599253416061
+    },
+    "direccion": "Vía Sin Nombre Vía Sin Nombre, La Paz, Baja California Sur, México",
+    "colonia": "Desconocido",
+    "etiquetas": [
+      "Venta",
+      "Drogas"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749241664/hjpnglo05u4bk1cnfpjt.jpg",
+    "userId": "JXmCIZN1ZnfKe2x2Gi0yfhTfH7O2",
+    "nombreUsuario": "Juana del agua ",
+    "creadoEn": {
+      "_seconds": 1749241666,
+      "_nanoseconds": 610000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "IWHPjeOjAXpOPripjiff",
+    "descripcion": "Basura cerca del malecon",
+    "titulo": "Basura en la calle",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749318540/qhhob6morstvmcxx3vex.jpg",
+    "userId": "cdwoAzqLR8Z9579Fs1ClSQEOxqs1",
+    "ubicacion": {
+      "longitude": -110.32179314643145,
+      "latitude": 24.15291415378251
+    },
+    "direccion": "2440 Calle Francisco I. Madero, La Paz, Baja California Sur, México",
+    "nombreUsuario": "Alvaro Alvarado",
+    "etiquetas": [
+      "Basura"
+    ],
+    "creadoEn": {
+      "_seconds": 1749318543,
+      "_nanoseconds": 104000000
+    },
+    "colonia": "Centro",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "IjkBrI7iELLQvojvVEAz",
+    "titulo": "Se me perdió mi mochila ",
+    "descripcion": "Ayúdeme a encontrar mi mochila se me perdió ",
+    "ubicacion": {
+      "latitude": 24.102755571093432,
+      "longitude": -110.31612563878298
+    },
+    "direccion": "KM 5.5 Sur, La Paz, Baja California Sur, México",
+    "colonia": "Boulevard Forjadores de Sudcalifornia",
+    "etiquetas": [
+      ""
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1768436558/vv7z1n1cofumiyx4stqm.jpg",
+    "estado": "pendiente",
+    "userId": "dRzRuSi0zgVLhA91fWw5WdEbOV13",
+    "nombreUsuario": "Elkomander",
+    "creadoEn": {
+      "_seconds": 1768436593,
+      "_nanoseconds": 59000000
+    }
+  },
+  {
+    "_id": "J5rd9Rz5HT0QpHe86xuw",
+    "descripcion": "Robo en esta ubicacion",
+    "etiquetas": [
+      "Robo",
+      "ladron"
+    ],
+    "colonia": "Boulevard Camino Real",
+    "titulo": "Robo ",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749608035/jebgm9rewcxz5r9wuysb.jpg",
+    "userId": "uQi1ZcEtOXTwfvOWwXDk1yYTw0T2",
+    "direccion": "245 Boulevard Camino Real, La Paz, Baja California Sur, México",
+    "nombreUsuario": "DVega",
+    "ubicacion": {
+      "longitude": -110.29828190803528,
+      "latitude": 24.055810700913938
+    },
+    "creadoEn": {
+      "_seconds": 1749608037,
+      "_nanoseconds": 805000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "Jhre1YfLqTEKWNsAoxgz",
+    "titulo": "Perro feo ",
+    "direccion": "326 Palma Datilera, La Paz, Baja California Sur, México",
+    "ubicacion": {
+      "latitude": 24.054572902182418,
+      "longitude": -110.30433263629675
+    },
+    "userId": "IL3rP6CXBtVK5014KnnBs2bHY7L2",
+    "etiquetas": [
+      "Mascota"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749330921/w9jlibjxsdtq3xrlzf0d.jpg",
+    "descripcion": "Me encontré este perro feo tengan cuidado si lo ven ",
+    "nombreUsuario": "Skskdj",
+    "creadoEn": {
+      "_seconds": 1749330924,
+      "_nanoseconds": 11000000
+    },
+    "colonia": "El Palmar",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "KPDE5Q9QAyuLF0GMBig2",
+    "descripcion": "Un cholo grafitio mi casa diganle que venga a pintar al cholo lo conlcen como chuy el de coppel",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749855669/zxsm2ke8b2cpb42zhfhn.jpg",
+    "ubicacion": {
+      "longitude": -110.29817327857018,
+      "latitude": 24.049379405802156
+    },
+    "titulo": " Un cholo grafitio mi casa",
+    "nombreUsuario": "Angel",
+    "userId": "IfPoiHj9hUUGUb9cpXBg821aha72",
+    "colonia": "Ayuntamiento",
+    "direccion": "185 Calle Eduardo Labastida, La Paz, Baja California Sur, México",
+    "creadoEn": {
+      "_seconds": 1749855672,
+      "_nanoseconds": 320000000
+    },
+    "etiquetas": [
+      "Grafiti",
+      "Cholo"
+    ],
+    "estado": "pendiente"
+  },
+  {
+    "_id": "TVSghuWLrg40tdGYvmDY",
+    "titulo": "Fuga de agua",
+    "descripcion": "Fuga de agua  en Manuel Torres Iglesias, lleva 6 horas sin tratarse",
+    "ubicacion": {
+      "latitude": 24.146237167460065,
+      "longitude": -110.27843859046698
+    },
+    "direccion": "771 Licenciado Manuel Torre Iglesias, La Paz, Baja California Sur, México",
+    "colonia": "La Escondida",
+    "etiquetas": [
+      "Fuga"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749241897/w7j094ih2ydeodop0d2j.jpg",
+    "userId": "JXmCIZN1ZnfKe2x2Gi0yfhTfH7O2",
+    "nombreUsuario": "Juana del agua ",
+    "creadoEn": {
+      "_seconds": 1749241899,
+      "_nanoseconds": 612000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "UgxPQISrv3hgzvl5CpS7",
+    "nombreUsuario": "Alvaro Alvarado",
+    "ubicacion": {
+      "latitude": 24.141268896175557,
+      "longitude": -110.29640771448612
+    },
+    "direccion": "2473 Antonio Rosales, La Paz, Baja California Sur, México",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749254635/jjg0u4jx72pzxdsayoib.jpg",
+    "titulo": "Testeo",
+    "userId": "cdwoAzqLR8Z9579Fs1ClSQEOxqs1",
+    "descripcion": "Una señora no limpio la caca de su perro ",
+    "etiquetas": [
+      "Basura"
+    ],
+    "creadoEn": {
+      "_seconds": 1749254637,
+      "_nanoseconds": 732000000
+    },
+    "colonia": "Benito Juárez",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "Y7rJpgMZCIaMq9YZtZUO",
+    "ubicacion": {
+      "longitude": -110.31807124614716,
+      "latitude": 24.158060319527834
+    },
+    "userId": "gelQ0jdG4pOywRWTcg0p9XkM5l63",
+    "titulo": "PRUEBA DE COLONKA",
+    "etiquetas": [
+      ""
+    ],
+    "direccion": "1865 Calle Francisco I. Madero, La Paz, Baja California Sur, México",
+    "nombreUsuario": "Italia",
+    "descripcion": "Ejemplo",
+    "colonia": "Calle Nicolás Bravo",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749518042/gnekao9aoj1tmswrp26n.jpg",
+    "creadoEn": {
+      "_seconds": 1749518043,
+      "_nanoseconds": 748000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "b88UZ7x3MbVE4mSDxLUx",
+    "titulo": "Vandalismo",
+    "descripcion": "Vandalizaron mi boletín. Favor de \nproceder.",
+    "ubicacion": {
+      "latitude": 24.118475215632703,
+      "longitude": -110.31910087913275
+    },
+    "direccion": "137 Almeja, La Paz, Baja California Sur, México",
+    "colonia": "Calle Almeja",
+    "etiquetas": [
+      "Vandalismo"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1762471924/ldllcmklh1d9sgw6g3v5.jpg",
+    "userId": "2bxcHECWkHTDVE2gfiYrI9YShiL2",
+    "nombreUsuario": "René Lazcano",
+    "creadoEn": {
+      "_seconds": 1762471932,
+      "_nanoseconds": 396000000
+    }
+  },
+  {
+    "_id": "dNr563C8HmxqVjGmIDZj",
+    "titulo": "Botarga sospechosa",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1750266414/qpvsszqciubiy58wad9m.jpg",
+    "colonia": "Loma Linda",
+    "nombreUsuario": "Fernanfloo",
+    "userId": "PhbmCvmZ4US2QbStvpliskBh7Y02",
+    "etiquetas": [
+      "Sospechoso",
+      "alerta"
+    ],
+    "descripcion": "Ayúdenos a localizar a este individuo con botarga de Barney, sospechamos que le vende sustancias a los niños ",
+    "direccion": "2645 General Bonifacio Salinas Leal, La Paz, Baja California Sur, México",
+    "ubicacion": {
+      "latitude": 24.135186715408054,
+      "longitude": -110.2995190769434
+    },
+    "creadoEn": {
+      "_seconds": 1750266418,
+      "_nanoseconds": 852000000
+    },
+    "estado": "resuelto",
+    "actualizadoEn": {
+      "_seconds": 1751143237,
+      "_nanoseconds": 107000000
+    }
+  },
+  {
+    "_id": "dyK13S4FIMcFXdH5FMt6",
+    "colonia": "Calle Almeja",
+    "descripcion": "Este carro está sospechoso en esta zona ",
+    "etiquetas": [
+      ""
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749497392/c66zumjlqj4gvrzvowkg.jpg",
+    "nombreUsuario": "DVega",
+    "direccion": "124 Almeja, La Paz, Baja California Sur, México",
+    "ubicacion": {
+      "latitude": 24.11877173640796,
+      "longitude": -110.31883701682091
+    },
+    "titulo": "Carro sospechoso ",
+    "userId": "uQi1ZcEtOXTwfvOWwXDk1yYTw0T2",
+    "creadoEn": {
+      "_seconds": 1749497395,
+      "_nanoseconds": 318000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "eNMsYNajMlw68d1BadqT",
+    "titulo": "Maltratadora de animales",
+    "descripcion": "Está señora identificada como goryp3, maltrato a su perro chiwis 23 casi 24 veces. Si la encuentran notificar a las autoridades ",
+    "ubicacion": {
+      "latitude": 24.152681344688798,
+      "longitude": -110.30042499303818
+    },
+    "direccion": "1514 Independencia, La Paz, Baja California Sur, México",
+    "colonia": "Calle Independencia",
+    "etiquetas": [
+      "Animales",
+      "Maltrato"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1751749447/fpottjbsp60q1cyoe3gs.jpg",
+    "estado": "pendiente",
+    "userId": "jW6ueURgPOhr6kOyremaqpx2i9l1",
+    "nombreUsuario": "Alvarado Alvarado",
+    "creadoEn": {
+      "_seconds": 1751749480,
+      "_nanoseconds": 932000000
+    }
+  },
+  {
+    "_id": "mDDNOfj8pB2GTWdxHq8z",
+    "titulo": "Bache",
+    "descripcion": "Bache",
+    "ubicacion": {
+      "latitude": 24.102160312335144,
+      "longitude": -110.31217843294144
+    },
+    "direccion": "Universidad Autónoma de , La Paz, Baja California Sur, México",
+    "colonia": "Desconocido",
+    "etiquetas": [
+      "#nosirvioelpunto"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1771975884/brhp8sb97fuc28yjxdha.jpg",
+    "estado": "pendiente",
+    "userId": "Dof8QF9zrbhH3ZzoVeooLfLB3dc2",
+    "nombreUsuario": "Juan barrera",
+    "creadoEn": {
+      "_seconds": 1771975885,
+      "_nanoseconds": 702000000
+    }
+  },
+  {
+    "_id": "mppnOXXQuQush76nBfxr",
+    "ubicacion": {
+      "longitude": -110.29270458966494,
+      "latitude": 24.044755507842936
+    },
+    "direccion": "",
+    "etiquetas": [
+      "Robo"
+    ],
+    "descripcion": "Este hombre entró a robar a mi casa tengan cuidado si lo ven por la zona",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749426351/longxjqvrr9v4uot8vh8.jpg",
+    "userId": "uQi1ZcEtOXTwfvOWwXDk1yYTw0T2",
+    "nombreUsuario": "DVega",
+    "titulo": "Ratero ",
+    "creadoEn": {
+      "_seconds": 1749426354,
+      "_nanoseconds": 931000000
+    },
+    "colonia": "Desconocido",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "mqNRWIb7TjGi4cZvPZ1M",
+    "nombreUsuario": "Skskdj",
+    "ubicacion": {
+      "longitude": -110.30403424054384,
+      "latitude": 24.066977597883707
+    },
+    "userId": "IL3rP6CXBtVK5014KnnBs2bHY7L2",
+    "etiquetas": [
+      "Auto"
+    ],
+    "descripcion": "Perdí mi auto  ",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749331246/fxd4qaluof2dsy7garcd.jpg",
+    "direccion": "109 Montaña, La Paz, Baja California Sur, México",
+    "titulo": "Perdí mi carro ayuda ",
+    "creadoEn": {
+      "_seconds": 1749331257,
+      "_nanoseconds": 980000000
+    },
+    "colonia": "La Fuente",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "pPPAEasUinyZexws4gx8",
+    "titulo": "Robo de autos",
+    "descripcion": "Este señor se robó mi auto",
+    "ubicacion": {
+      "latitude": 24.145444166114785,
+      "longitude": -110.30421495437622
+    },
+    "direccion": "Ignacio Allende 1715 Esquina Chiapas , La Paz, Baja California Sur, México",
+    "colonia": "Centro",
+    "etiquetas": [
+      "Robo",
+      "Auto"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1764052166/bvdcqxdzsqwewldqltu4.jpg",
+    "estado": "pendiente",
+    "userId": "jW6ueURgPOhr6kOyremaqpx2i9l1",
+    "nombreUsuario": "Alvarado Alvarado",
+    "creadoEn": {
+      "_seconds": 1764052168,
+      "_nanoseconds": 495000000
+    }
+  },
+  {
+    "_id": "qu2ocYnCEcH4FTudltYc",
+    "direccion": "76 Paseo Álvaro Obregón, La Paz, Baja California Sur, México",
+    "titulo": "Se vende gato hidraulico barato",
+    "colonia": "Paseo Álvaro Obregón",
+    "descripcion": "Vendo gatio hidraulico barato casi no levanta pero esta barato $$",
+    "userId": "IfPoiHj9hUUGUb9cpXBg821aha72",
+    "nombreUsuario": "Angel",
+    "etiquetas": [
+      "Venta"
+    ],
+    "ubicacion": {
+      "longitude": -110.3226088732481,
+      "latitude": 24.155275260675594
+    },
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749508640/t4iedpv6fofikvxo1vsw.jpg",
+    "creadoEn": {
+      "_seconds": 1749508642,
+      "_nanoseconds": 727000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "rHjpCSXQsIu5CSpSdNq7",
+    "titulo": "Gato perdido ",
+    "descripcion": "Pefdi ami gato esta es la única foto que tengo de el :(",
+    "ubicacion": {
+      "latitude": 24.0506570566264,
+      "longitude": -110.29708530753851
+    },
+    "direccion": "221 Ayuntamiento de Mulegé, La Paz, Baja California Sur, México",
+    "colonia": "Ayuntamiento",
+    "etiquetas": [
+      "Mascota"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749245398/d5zls2otxpsbw3fyn7jy.jpg",
+    "userId": "IL3rP6CXBtVK5014KnnBs2bHY7L2",
+    "nombreUsuario": "Skskdj",
+    "creadoEn": {
+      "_seconds": 1749245401,
+      "_nanoseconds": 319000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "sEMO8xtlyGH0toJngXA3",
+    "colonia": "Calle General Manuel Márquez de León",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749426785/qyxnzfbysbf8qw3a8vl1.jpg",
+    "descripcion": "Estoy en la cajuela de un chevy blanco",
+    "titulo": "Me levantaron banda",
+    "direccion": "2390 Calle Yucatán, La Paz, Baja California Sur, México",
+    "userId": "cdwoAzqLR8Z9579Fs1ClSQEOxqs1",
+    "nombreUsuario": "Alvaro Alvarado",
+    "ubicacion": {
+      "longitude": -110.30537031590939,
+      "latitude": 24.142306072026088
+    },
+    "etiquetas": [
+      "Secuestro"
+    ],
+    "creadoEn": {
+      "_seconds": 1749426788,
+      "_nanoseconds": 572000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "sXAdkQhmukiEcPaEZewa",
+    "titulo": "Pequeño bachesito enfrente de mi casa",
+    "etiquetas": [
+      "Bache"
+    ],
+    "nombreUsuario": "Humberto XD",
+    "direccion": "Calle Ayuntamiento de los Cabos Calle Ayuntamiento de los Cabos, La Paz, B.C.S., México",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749244645/qxum22tkrffiptswoej4.jpg",
+    "descripcion": "enfrente de mi casa se hizo un pequelo bachesito no es muy grande pero ayer se perdio mi carro y no se donde esta  ",
+    "ubicacion": {
+      "latitude": 24.049924939216396,
+      "longitude": -110.298090127455
+    },
+    "userId": "lpM8jhkudXal063JlcT4qVKl8B43",
+    "colonia": "Ayuntamiento",
+    "creadoEn": {
+      "_seconds": 1749244646,
+      "_nanoseconds": 301000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "trjM156FfDKchHenKzT7",
+    "titulo": "Portador de arma",
+    "descripcion": "Hombre armando en el pecero",
+    "ubicacion": {
+      "latitude": 24.120078990086384,
+      "longitude": -110.31895637512207
+    },
+    "direccion": "103 Caracol, La Paz, Baja California Sur, México",
+    "colonia": "Gaviotas",
+    "etiquetas": [
+      "Camión",
+      "Arma"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1764183497/s2x4efn7gmszdo6san74.jpg",
+    "estado": "pendiente",
+    "userId": "Dof8QF9zrbhH3ZzoVeooLfLB3dc2",
+    "nombreUsuario": "Juan barrera",
+    "creadoEn": {
+      "_seconds": 1764183504,
+      "_nanoseconds": 922000000
+    }
+  },
+  {
+    "_id": "txQCbm7d2GPsyYcV4VUg",
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749331793/pjsdrelriu2c7wsotxzd.jpg",
+    "ubicacion": {
+      "latitude": 24.134517124056504,
+      "longitude": -110.32566295721283
+    },
+    "userId": "lpM8jhkudXal063JlcT4qVKl8B43",
+    "etiquetas": [
+      "Casas",
+      "Renta"
+    ],
+    "nombreUsuario": "Humberto XD",
+    "descripcion": "Mi tía renta casa baratas comunicarse al número +52 612 246 6585 facilidades de pago y contamos con servicios funerarios, no contamos con servicio médico en caso de disparos con arma de fuego ",
+    "titulo": "Mi tía anda rentando casas baratas ",
+    "direccion": "Calle Pino 880 Calle Pino, La Paz, B.C.S., México",
+    "creadoEn": {
+      "_seconds": 1749331794,
+      "_nanoseconds": 655000000
+    },
+    "colonia": " Las Arboledas",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "us3pAW6R4ozVl1LZnjwJ",
+    "titulo": "Transporte en mal estado",
+    "descripcion": "Quiero reportar los transportres públicos que están en muy mal estado, esta mejor el tiburon pero no pasa por mi casa y tengo que subirme a estos",
+    "ubicacion": {
+      "latitude": 24.053075158942534,
+      "longitude": -110.30149888247252
+    },
+    "direccion": "Av.Transpenisular Calzada El Camino Real, La Paz, Baja California Sur, México",
+    "colonia": "Ayuntamiento",
+    "etiquetas": [
+      "Transporte",
+      "pesero",
+      "tiburon"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1764181353/kf4iqvb7jhvyrgu9cslx.jpg",
+    "estado": "pendiente",
+    "userId": "jE5U2qmuFtYOtzlusqZqIoVSFMm1",
+    "nombreUsuario": "DanielVga",
+    "creadoEn": {
+      "_seconds": 1764181496,
+      "_nanoseconds": 285000000
+    }
+  },
+  {
+    "_id": "vZKjqgTtmNqSjAS88htE",
+    "titulo": "Asalto",
+    "descripcion": "Este hombre me robó mi cartera",
+    "ubicacion": {
+      "latitude": 24.141714668656313,
+      "longitude": -110.30319537967443
+    },
+    "direccion": "2300 Calle Hermenegildo Galeana, La Paz, Baja California Sur, México",
+    "colonia": "Calle Hermenegildo Galeana",
+    "etiquetas": [
+      "Asalto",
+      "violencia"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1764181425/m2cenwedbqvuxpbsudyg.jpg",
+    "estado": "pendiente",
+    "userId": "Dof8QF9zrbhH3ZzoVeooLfLB3dc2",
+    "nombreUsuario": "Juan barrera",
+    "creadoEn": {
+      "_seconds": 1764181427,
+      "_nanoseconds": 195000000
+    }
+  },
+  {
+    "_id": "vuIXgRbmzUF1FAPGi5Jx",
+    "titulo": "Ratero vistaso",
+    "descripcion": "Ratero le robó su bolsa. Aún a una doña, y se pegó la fuga",
+    "ubicacion": {
+      "latitude": 24.05555352877377,
+      "longitude": -110.29833521693945
+    },
+    "direccion": "245 Boulevard Camino Real, La Paz, Baja California Sur, México",
+    "colonia": "Boulevard Camino Real",
+    "etiquetas": [
+      "Asalto"
+    ],
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749357639/qwy5gj5ouvtomuxsvud8.jpg",
+    "userId": "cdwoAzqLR8Z9579Fs1ClSQEOxqs1",
+    "nombreUsuario": "Alvaro Alvarado",
+    "creadoEn": {
+      "_seconds": 1749357643,
+      "_nanoseconds": 194000000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "_id": "xTw3PJvA0hSRXF1Zqxx6",
+    "descripcion": "Se me perdio mi perro en el chedrahui y lo deje afuera y se metio y se perdio en la seccion de carniceria y ya no lo encontre ",
+    "etiquetas": [
+      "Perro",
+      "perdido"
+    ],
+    "userId": "lpM8jhkudXal063JlcT4qVKl8B43",
+    "imagenURL": "",
+    "nombreUsuario": "Humberto XD",
+    "ubicacion": {
+      "latitude": 24.14324685261142,
+      "longitude": -110.3313574231126
+    },
+    "direccion": "Calle Belisario Domínguez Calle Belisario Domínguez, La Paz, B.C.S., México",
+    "titulo": "Perro perdido",
+    "creadoEn": {
+      "_seconds": 1749244337,
+      "_nanoseconds": 800000000
+    },
+    "colonia": "Centro",
+    "estado": "pendiente"
+  },
+  {
+    "_id": "yZpEJq6HIZrftq0uoYHq",
+    "titulo": "Ratero ",
+    "nombreUsuario": "DVega",
+    "ubicacion": {
+      "longitude": -110.29313273727894,
+      "latitude": 24.045228254091732
+    },
+    "imagenURL": "https://res.cloudinary.com/dcsa4u3cj/image/upload/v1749426393/yegbjwj2lwodcacdl3la.jpg",
+    "descripcion": "Este hombre entró a robar a mi casa tengan cuidado si lo ven por la zona",
+    "userId": "uQi1ZcEtOXTwfvOWwXDk1yYTw0T2",
+    "direccion": "km 200+300 Carretera Transpeninsular, La Paz, Baja California Sur, México",
+    "etiquetas": [
+      "Robo"
+    ],
+    "creadoEn": {
+      "_seconds": 1749426396,
+      "_nanoseconds": 403000000
+    },
+    "colonia": "Ayuntamiento",
+    "estado": "pendiente"
+  }
+]
