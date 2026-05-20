@@ -6,13 +6,15 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import * as ImageManipulator from "expo-image-manipulator";
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { app, db } from '../config/firebaseConfig';
+import { app } from '../config/firebaseConfig';
 import UbicationSelector from '../utils/ubicationSelector';
 import { useFocusEffect } from '@react-navigation/native';
+import { v4 as uuidv4 } from 'uuid';
 
-
+// Importar servicios locales
+import { initLocalDB, guardarReporteLocal } from '../services/LocalDB';
+import { sincronizarCompleto, isConnected } from '../services/SyncService';
 
 // Obtener colonia desde Nominatim (OpenStreetMap)
 const obtenerColonia = async (lat, lon) => {
@@ -51,7 +53,6 @@ export default function CreateReport({ navigation }) {
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
 
-
   const limpiarFormulario = () => {
     setTitulo('');
     setDescripcion('');
@@ -66,6 +67,11 @@ export default function CreateReport({ navigation }) {
       limpiarFormulario();
     }, [])
   );
+
+  // Inicializar BD local al montar el componente
+  React.useEffect(() => {
+    initLocalDB();
+  }, []);
 
   const pedirPermisos = async () => {
     const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
@@ -112,40 +118,38 @@ export default function CreateReport({ navigation }) {
     }
   };
 
-const subirImagen = async (uri) => {
-  try {
-    // 1. Comprimir imagen primero
-    const compressed = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 1080 } }],  // HD pero liviana
-      { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
-    );
+  const subirImagen = async (uri) => {
+    try {
+      const compressed = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1080 } }],
+        { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
+      );
 
-    const data = new FormData();
-    data.append("file", {
-      uri: compressed.uri,
-      type: "image/jpeg",
-      name: "reporte_comprimido.jpg",
-    });
-    data.append("upload_preset", "report");
-    data.append("cloud_name", "dcsa4u3cj");
+      const data = new FormData();
+      data.append("file", {
+        uri: compressed.uri,
+        type: "image/jpeg",
+        name: "reporte_comprimido.jpg",
+      });
+      data.append("upload_preset", "report");
+      data.append("cloud_name", "dcsa4u3cj");
 
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dcsa4u3cj/image/upload",
-      {
-        method: "POST",
-        body: data,
-      }
-    );
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dcsa4u3cj/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
 
-    const result = await res.json();
-    return result.secure_url;
-
-  } catch (error) {
-    console.error("Error subiendo imagen:", error);
-    throw error;
-  }
-};
+      const result = await res.json();
+      return result.secure_url;
+    } catch (error) {
+      console.error("Error subiendo imagen:", error);
+      throw error;
+    }
+  };
 
   const handleLocationSelected = async (location) => {
     setSelectedLocation(location);
@@ -175,30 +179,55 @@ const subirImagen = async (uri) => {
     let imagenURL = '';
 
     try {
+      const userId = auth.currentUser?.uid || 'anonymous';
+      const userName = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Anónimo';
+
+      // Subir imagen a Cloudinary si existe
       if (imagen) {
         imagenURL = await subirImagen(imagen);
       }
 
+      // Obtener colonia
       const colonia = await obtenerColonia(
         selectedLocation.latitude,
         selectedLocation.longitude
       );
 
-      await addDoc(collection(db, 'reportes'), {
-        titulo,
-        descripcion,
-        ubicacion: selectedLocation,
+      // Crear objeto del reporte para BD local
+      const nuevoReporte = {
+        id: uuidv4(),  // ID único para el reporte local
+        titulo: titulo,
+        descripcion: descripcion,
+        latitud: selectedLocation.latitude,
+        longitud: selectedLocation.longitude,
+        foto_url: imagenURL,
+        timestamp_original: Date.now(),  // ← CLAVE: se guarda AHORA
+        sincronizado: 0,  // Pendiente de sincronizar
+        user_id: userId,
+        user_name: userName,
+        // Datos adicionales para mantener compatibilidad
         direccion: ubicacionTexto,
-        colonia,
+        colonia: colonia,
         etiquetas: etiquetas.split(',').map(e => e.trim()),
-        imagenURL,
-        estado: "pendiente",
-        creadoEn: serverTimestamp(), 
-        userId: auth.currentUser.uid,
-        nombreUsuario: auth.currentUser.displayName || 'Sin nombre',
-      });
+        estado: "pendiente"
+      };
 
-      Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
+      // Guardar en SQLite local
+      await guardarReporteLocal(nuevoReporte);
+
+      Alert.alert('¡Reporte guardado!', `Tu reporte "${titulo}" se ha guardado localmente. Se sincronizará cuando tengas conexión.`);
+
+      // Intentar sincronizar inmediatamente si hay internet
+      const hayInternet = await isConnected();
+      if (hayInternet) {
+        const resultado = await sincronizarCompleto(userId);
+        if (resultado.subidos > 0) {
+          Alert.alert('✅ Sincronizado', `${resultado.subidos} reporte(s) enviado(s) al servidor.`);
+        }
+      } else {
+        Alert.alert('📱 Modo offline', 'El reporte se guardó localmente. Se enviará cuando recuperes la conexión.');
+      }
+
       navigation.navigate('Feed');
     } catch (error) {
       console.error('Error al publicar:', error);

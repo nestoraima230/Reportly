@@ -1,40 +1,101 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Share } from 'react-native';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+import { getAuth } from 'firebase/auth';
 import { app } from '../config/firebaseConfig';
 
-const db = getFirestore(app);
+// Importar servicios locales
+import { initLocalDB, getReportesLocales } from '../services/LocalDB';
+import { sincronizarCompleto, isConnected, iniciarSincronizacionAutomatica, detenerSincronizacionAutomatica } from '../services/SyncService';
 
 export default function Feed() {
   const [reportes, setReportes] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
   const navigation = useNavigation();
+  const auth = getAuth(app);
+  console.log('📱 Usuario actual UID:', auth.currentUser?.uid);
 
-useEffect(() => {
-  const unsubscribe = onSnapshot(collection(db, 'reportes'), (snapshot) => {
-    const data = snapshot.docs.map(doc => {
-      const d = doc.data();
-      return {
-        id: doc.id,
-        title: d.titulo,
-        description: d.descripcion,
-        image: d.imagenURL,
-        comments: d.comentarios || [],
-        user: d.nombreUsuario || 'Anónimo',
-        direccion: d.direccion || 'Ubicación no disponible',
-        etiquetas: d.etiquetas || [],
-        estado: d.estado,
-        creadoEn: d.creadoEn?.toDate() || null, 
-        ubicacion: d.ubicacion,
 
-      };
-    });
-    setReportes(data);
-  });
+  useEffect(() => {
+    // Inicializar BD local
+    initLocalDB();
+    
+    // Cargar reportes locales
+    cargarReportesLocales();
+    
+    // Iniciar sincronización automática si hay usuario logueado
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      iniciarSincronizacionAutomatica(userId);
+    }
+    
+    // Limpiar al desmontar
+    return () => {
+      detenerSincronizacionAutomatica();
+    };
+  }, []);
 
-  return () => unsubscribe();
-}, []);
+  const cargarReportesLocales = async () => {
+    const reportesLocales = await getReportesLocales();
+    // Transformar a formato compatible con el renderizado existente
+    const reportesFormateados = reportesLocales.map(r => ({
+      id: r.id,
+      title: r.titulo,
+      description: r.descripcion,
+      image: r.foto_url,
+      user: r.user_name || 'Anónimo',
+      direccion: r.direccion || 'Ubicación no disponible',
+      etiquetas: r.etiquetas || [],
+      estado: r.estado || 'pendiente',
+      creadoEn: new Date(r.timestamp_original),
+      ubicacion: { latitude: r.latitud, longitude: r.longitud },
+      sincronizado: r.sincronizado === 1
+    }));
+    setReportes(reportesFormateados);
+  };
 
+  const handleSync = async () => {
+    const userId = auth.currentUser?.uid;
+    if (!userId) {
+      Alert.alert('Error', 'Debes iniciar sesión para sincronizar');
+      return;
+    }
+    
+    setIsSyncing(true);
+    setSyncStatus('Verificando conexión...');
+    
+    const hayInternet = await isConnected();
+    if (!hayInternet) {
+      Alert.alert('⚠️ Sin conexión', 'No hay internet. Los reportes se sincronizarán cuando tengas conexión.');
+      setIsSyncing(false);
+      setSyncStatus('');
+      return;
+    }
+    
+    setSyncStatus('Sincronizando con el servidor...');
+    const resultado = await sincronizarCompleto(userId);
+    
+    if (resultado.success) {
+      await cargarReportesLocales();
+      Alert.alert(
+        '✅ Sincronización completada',
+        `📤 Subidos: ${resultado.subidos}\n📥 Descargados: ${resultado.descargados}\n${resultado.errores > 0 ? `⚠️ Errores: ${resultado.errores}` : ''}`
+      );
+    } else {
+      Alert.alert('❌ Error', resultado.error || 'Error en la sincronización');
+    }
+    
+    setIsSyncing(false);
+    setSyncStatus('');
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await cargarReportesLocales();
+    setRefreshing(false);
+  };
 
   const handleShare = async (title, description) => {
     try {
@@ -54,74 +115,96 @@ useEffect(() => {
     navigation.navigate('ReportDetail', { reporte });
   };
 
-const renderPost = ({ item }) => {
-  const direccionRecortada = item.direccion.length > 50
-    ? item.direccion.slice(0, 50) + '...'
-    : item.direccion;
+  const renderPost = ({ item }) => {
+    const direccionRecortada = item.direccion?.length > 50
+      ? item.direccion.slice(0, 50) + '...'
+      : item.direccion || 'Ubicación no disponible';
 
-  return (
-    <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
-      {/* Usuario */}
-      <Text style={styles.user}>👤 {item.user}</Text>
+    return (
+      <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
+        {/* Usuario */}
+        <Text style={styles.user}>👤 {item.user}</Text>
 
-      {/* Fecha de publicación */}
-      {item.creadoEn && (
-        <Text style={styles.fecha}>
-          🕒 {item.creadoEn.toLocaleString('es-MX', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-          })}
-        </Text>
-      )}
+        {/* Fecha de publicación */}
+        {item.creadoEn && (
+          <Text style={styles.fecha}>
+            🕒 {item.creadoEn.toLocaleString('es-MX', {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            })}
+          </Text>
+        )}
 
-      {/* Imagen */}
-      {item.image && (
-        <Image source={{ uri: item.image }} style={styles.image} />
-      )}
+        {/* Indicador de sincronización pendiente */}
+        {!item.sincronizado && (
+          <View style={styles.pendienteContainer}>
+            <Text style={styles.pendienteTexto}>⏳ Pendiente de sincronizar</Text>
+          </View>
+        )}
 
-      {/* Título */}
-      <TouchableOpacity onPress={() => navigation.navigate('ReportDetail', { reporte: item })}>
+        {/* Imagen */}
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.image} />
+        )}
+
+        {/* Título */}
         <Text style={styles.title}>{item.title}</Text>
-      </TouchableOpacity>
 
-      {/* Descripción */}
-      <Text style={styles.description}>{item.description}</Text>
+        {/* Descripción */}
+        <Text style={styles.description}>{item.description}</Text>
 
-      {/* Dirección */}
-      <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
+        {/* Dirección */}
+        <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
 
-      {/* Etiquetas */}
-      {item.etiquetas.length > 0 && (
-        <View style={styles.etiquetasContainer}>
-          {item.etiquetas.map((etiqueta, index) => (
-            <Text key={index} style={styles.etiqueta}>#{etiqueta}</Text>
-          ))}
+        {/* Etiquetas */}
+        {item.etiquetas?.length > 0 && (
+          <View style={styles.etiquetasContainer}>
+            {item.etiquetas.map((etiqueta, index) => (
+              <Text key={index} style={styles.etiqueta}>#{etiqueta}</Text>
+            ))}
+          </View>
+        )}
+
+        {/* Acciones */}
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
+            <Text style={styles.actionText}>📤 Compartir</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleReport(item.title)}>
+            <Text style={styles.actionText}>🚩 Reportar</Text>
+          </TouchableOpacity>
         </View>
-      )}
-
-      {/* Acciones */}
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
-          <Text style={styles.actionText}>📤 Compartir</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => handleReport(item.title)}>
-          <Text style={styles.actionText}>🚩 Reportar</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
+      {/* Barra de sincronización */}
+      <View style={styles.syncBar}>
+        <TouchableOpacity 
+          style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]} 
+          onPress={handleSync}
+          disabled={isSyncing}
+        >
+          <Text style={styles.syncButtonText}>
+            {isSyncing ? '🔄 Sincronizando...' : '🔄 Sincronizar'}
+          </Text>
+        </TouchableOpacity>
+        {syncStatus !== '' && (
+          <Text style={styles.syncStatus}>{syncStatus}</Text>
+        )}
+      </View>
+
       <FlatList
         data={reportes}
         keyExtractor={(item) => item.id}
         renderItem={renderPost}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún</Text>}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún. ¡Crea tu primero!</Text>}
       />
     </View>
   );
@@ -130,6 +213,33 @@ const renderPost = ({ item }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   list: { padding: 10 },
+  syncBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: '#f0f0f0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  syncButton: {
+    backgroundColor: '#2c4d4e',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  syncButtonDisabled: {
+    backgroundColor: '#aaa',
+  },
+  syncButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  syncStatus: {
+    fontSize: 12,
+    color: '#666',
+  },
   post: {
     marginBottom: 20,
     padding: 15,
@@ -137,8 +247,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     elevation: 3,
   },
-  image: { width: '100%', height: 200, borderRadius: 10 },
-  title: { fontSize: 18, fontWeight: 'bold', marginTop: 10 },
+  image: { width: '100%', height: 200, borderRadius: 10, marginBottom: 10 },
+  title: { fontSize: 18, fontWeight: 'bold', marginTop: 5 },
   description: { fontSize: 16, marginVertical: 5 },
   direccion: {
     fontSize: 14,
@@ -157,13 +267,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 10,
   },
-fecha: {
-  fontSize: 12,
-  color: '#777',
-  marginBottom: 5,
-  fontStyle: 'italic',
-},
-
+  fecha: {
+    fontSize: 12,
+    color: '#777',
+    marginBottom: 5,
+    fontStyle: 'italic',
+  },
   etiqueta: {
     backgroundColor: '#007BFF',
     color: '#fff',
@@ -189,5 +298,16 @@ fecha: {
     marginTop: 40,
     fontSize: 16,
     color: '#999',
+  },
+  pendienteContainer: {
+    backgroundColor: '#FFF3E0',
+    padding: 5,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  pendienteTexto: {
+    color: '#FF9800',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
