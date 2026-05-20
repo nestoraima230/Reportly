@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 import { app } from '../config/firebaseConfig';
 
 // Importar servicios locales
-import { initLocalDB, getReportesLocales } from '../services/LocalDB';
+import { initLocalDB, getReportesLocales, resetearBaseDatosLocal } from '../services/LocalDB';
 import { sincronizarCompleto, isConnected, iniciarSincronizacionAutomatica, detenerSincronizacionAutomatica } from '../services/SyncService';
 
 export default function Feed() {
@@ -21,16 +21,16 @@ export default function Feed() {
   useEffect(() => {
     // Inicializar BD local
     initLocalDB();
-    
+
     // Cargar reportes locales
     cargarReportesLocales();
-    
+
     // Iniciar sincronización automática si hay usuario logueado
     const userId = auth.currentUser?.uid;
     if (userId) {
       iniciarSincronizacionAutomatica(userId);
     }
-    
+
     // Limpiar al desmontar
     return () => {
       detenerSincronizacionAutomatica();
@@ -39,6 +39,7 @@ export default function Feed() {
 
   const cargarReportesLocales = async () => {
     const reportesLocales = await getReportesLocales();
+    console.log('📊 Reportes con sincronizado:', reportesLocales.map(r => ({ titulo: r.titulo, sincronizado: r.sincronizado })));
     // Transformar a formato compatible con el renderizado existente
     const reportesFormateados = reportesLocales.map(r => ({
       id: r.id,
@@ -51,10 +52,30 @@ export default function Feed() {
       estado: r.estado || 'pendiente',
       creadoEn: new Date(r.timestamp_original),
       ubicacion: { latitude: r.latitud, longitude: r.longitud },
-      sincronizado: r.sincronizado === 1
+      sincronizado: r.sincronizado === 1 || r.sincronizado === true
     }));
     setReportes(reportesFormateados);
   };
+
+  // Esto borra TODOS los reportes locales y los vuelve a descargar
+  const resetearYReSincronizar = async () => {
+    console.log('🔄 Reseteando completamente...');
+
+    // 1. Limpiar toda la base de datos local
+    await resetearBaseDatosLocal();  // ← Nueva función
+
+    // 2. Sincronizar para traer los reportes del servidor
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      await sincronizarCompleto(userId);
+    }
+
+    // 3. Recargar el feed
+    await cargarReportesLocales();
+
+    console.log('✅ Proceso completado');
+  };
+
 
   const handleSync = async () => {
     const userId = auth.currentUser?.uid;
@@ -62,10 +83,10 @@ export default function Feed() {
       Alert.alert('Error', 'Debes iniciar sesión para sincronizar');
       return;
     }
-    
+
     setIsSyncing(true);
     setSyncStatus('Verificando conexión...');
-    
+
     const hayInternet = await isConnected();
     if (!hayInternet) {
       Alert.alert('⚠️ Sin conexión', 'No hay internet. Los reportes se sincronizarán cuando tengas conexión.');
@@ -73,10 +94,10 @@ export default function Feed() {
       setSyncStatus('');
       return;
     }
-    
+
     setSyncStatus('Sincronizando con el servidor...');
     const resultado = await sincronizarCompleto(userId);
-    
+
     if (resultado.success) {
       await cargarReportesLocales();
       Alert.alert(
@@ -86,7 +107,7 @@ export default function Feed() {
     } else {
       Alert.alert('❌ Error', resultado.error || 'Error en la sincronización');
     }
-    
+
     setIsSyncing(false);
     setSyncStatus('');
   };
@@ -183,8 +204,8 @@ export default function Feed() {
     <View style={styles.container}>
       {/* Barra de sincronización */}
       <View style={styles.syncBar}>
-        <TouchableOpacity 
-          style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]} 
+        <TouchableOpacity
+          style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}
           onPress={handleSync}
           disabled={isSyncing}
         >
@@ -192,11 +213,21 @@ export default function Feed() {
             {isSyncing ? '🔄 Sincronizando...' : '🔄 Sincronizar'}
           </Text>
         </TouchableOpacity>
+
+        {/* Botón temporal para limpiar duplicados */}
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={resetearYReSincronizar}
+        >
+          <Text style={styles.clearButtonText}>🗑️ Limpiar Duplicados</Text>
+        </TouchableOpacity>
+
         {syncStatus !== '' && (
           <Text style={styles.syncStatus}>{syncStatus}</Text>
         )}
       </View>
 
+      {/* Lista de reportes */}
       <FlatList
         data={reportes}
         keyExtractor={(item) => item.id}
@@ -235,6 +266,18 @@ const styles = StyleSheet.create({
   syncButtonText: {
     color: '#fff',
     fontSize: 14,
+  },
+  // Estilos nuevos para el botón de limpiar duplicados
+  clearButton: {
+    backgroundColor: '#ff9800',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginLeft: 10,
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontSize: 12,
   },
   syncStatus: {
     fontSize: 12,

@@ -309,3 +309,47 @@ export const getConteoReportes = () => {
     return Promise.resolve({ total: 0, pendientes: 0, sincronizados: 0 });
   }
 };
+
+/**
+ * Verificar si un reporte ya existe localmente por su ID
+ */
+export const verificarSiExisteReporte = (id) => {
+  try {
+    const rows = ejecutarSelect(
+      `SELECT id FROM reportes_locales WHERE id = ?;`,
+      [id]
+    );
+    const existe = rows.length > 0;
+    return existe;
+  } catch (error) {
+    console.error('❌ Error verificando existencia:', error);
+    return false;
+  }
+};
+
+/**
+ * Limpiar reportes duplicados en SQLite (mantener solo uno por ID)
+ */
+/**
+ * Limpiar reportes duplicados en SQLite basado en título + timestamp
+ * Mantener solo el más reciente (o el primero) de cada grupo duplicado
+ */
+/**
+ * Resetear completamente la base de datos local
+ */
+export const resetearBaseDatosLocal = async () => {
+  try {
+    // Borrar todos los reportes
+    ejecutarConsulta(`DELETE FROM reportes_locales;`);
+    console.log('🗑️ Todos los reportes eliminados');
+    
+    // Reiniciar la metadata de sincronización
+    ejecutarConsulta(`DELETE FROM sync_metadata;`);
+    console.log('🗑️ Metadata reiniciada');
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('❌ Error reseteando:', error);
+    return Promise.reject(error);
+  }
+};

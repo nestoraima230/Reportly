@@ -5,13 +5,14 @@ import {
   marcarSincronizado, 
   guardarUltimaSincronizacion,
   getUltimaSincronizacion,
-  guardarReporteLocal
+  guardarReporteLocal,
+  verificarSiExisteReporte      
 } from './LocalDB';
 
 // IMPORTANTE: Cambiar esta IP por la IP de tu computadora en la red local
 // Para desarrollo con Expo: usa la IP de tu máquina (no localhost)
 // Ejemplo: 'http://192.168.1.100:3000'
-const API_URL = 'http://192.168.1.122:3000'; // ← CAMBIAR ANTES DE LA DEMO
+const API_URL = process.env.EXPO_PUBLIC_API_URL; // ← CAMBIAR ANTES DE LA DEMO
 
 /**
  * Subir reportes pendientes al servidor (PUSH)
@@ -106,8 +107,18 @@ export const pullReportesDelServidor = async (userId) => {
     console.log(`   📥 Reportes del servidor: ${reportesServidor.length}`);
     
     let guardados = 0;
+    let duplicados = 0;
     
     for (const reporte of reportesServidor) {
+      // 🔥 CLAVE: Verificar si el reporte YA EXISTE localmente
+      const existe = await verificarSiExisteReporte(reporte._id);
+      
+      if (existe) {
+        console.log(`   ⏭️ Duplicado omitido: ${reporte.titulo} (${reporte._id})`);
+        duplicados++;
+        continue;  // Saltar este reporte
+      }
+      
       // Calcular timestamp_original de forma segura
       let timestampOriginal = reporte.timestamp_original;
       if (!timestampOriginal) {
@@ -116,12 +127,11 @@ export const pullReportesDelServidor = async (userId) => {
         } else if (reporte.fecha) {
           timestampOriginal = new Date(reporte.fecha).getTime();
         } else {
-          timestampOriginal = Date.now(); // Valor por defecto
+          timestampOriginal = Date.now();
         }
       }
       
-      // Log para debug
-      console.log(`   Procesando reporte: ${reporte.titulo}, timestamp: ${timestampOriginal}`);
+      console.log(`   ✅ Nuevo reporte: ${reporte.titulo}, timestamp: ${timestampOriginal}`);
       
       const reporteLocal = {
         id: reporte._id,
@@ -144,11 +154,12 @@ export const pullReportesDelServidor = async (userId) => {
       guardados++;
     }
     
+    console.log(`✅ PULL completado: +${guardados} nuevos, ${duplicados} duplicados omitidos`);
+    
     if (guardados > 0) {
       await guardarUltimaSincronizacion(Date.now());
     }
     
-    console.log(`✅ PULL completado: ${guardados} reportes guardados`);
     return { success: true, guardados };
     
   } catch (error) {
