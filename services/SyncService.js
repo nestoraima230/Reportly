@@ -6,7 +6,8 @@ import {
   guardarUltimaSincronizacion,
   getUltimaSincronizacion,
   guardarReporteLocal,
-  verificarSiExisteReporte      
+  verificarSiExisteReporte,
+  getReportesLocales
 } from './LocalDB';
 
 // IMPORTANTE: Cambiar esta IP por la IP de tu computadora en la red local
@@ -106,32 +107,55 @@ export const pullReportesDelServidor = async (userId) => {
     const reportesServidor = data.data || [];
     console.log(`   📥 Reportes del servidor: ${reportesServidor.length}`);
     
+    // Obtener IDs de reportes que YA existen localmente (para evitar duplicados)
+    const reportesLocales = await getReportesLocales();
+    const idsLocales = new Set(reportesLocales.map(r => r.id));
+    const titulosLocales = new Set(reportesLocales.map(r => r.titulo));
+    
     let guardados = 0;
     let duplicados = 0;
     
     for (const reporte of reportesServidor) {
-      // 🔥 CLAVE: Verificar si el reporte YA EXISTE localmente
-      const existe = await verificarSiExisteReporte(reporte._id);
-      
-      if (existe) {
-        console.log(`   ⏭️ Duplicado omitido: ${reporte.titulo} (${reporte._id})`);
+      // 🔥 CRITERIO 1: Si el ID ya existe localmente, omitir
+      if (idsLocales.has(reporte._id)) {
+        console.log(`   ⏭️ Duplicado por ID omitido: ${reporte.titulo}`);
         duplicados++;
-        continue;  // Saltar este reporte
+        continue;
       }
       
-      // Calcular timestamp_original de forma segura
+      // 🔥 CRITERIO 2: Si el título ya existe localmente Y fue creado recientemente (última hora), omitir
+      const tituloExistente = titulosLocales.has(reporte.titulo);
+      const tiempoServidor = new Date(reporte.creadoEn).getTime();
+      const ahora = Date.now();
+      const esReciente = (ahora - tiempoServidor) < 3600000; // 1 hora
+      
+      if (tituloExistente && esReciente) {
+        console.log(`   ⏭️ Duplicado por título omitido: ${reporte.titulo}`);
+        duplicados++;
+        continue;
+      }
+      
+      // Validar que tenga coordenadas válidas
+      const tieneUbicacion = reporte.ubicacion && 
+                             reporte.ubicacion.coordinates &&
+                             reporte.ubicacion.coordinates[0] !== 0 &&
+                             reporte.ubicacion.coordinates[1] !== 0;
+      
+      if (!tieneUbicacion) {
+        console.log(`   ⏭️ Sin ubicación válida omitido: ${reporte.titulo}`);
+        duplicados++;
+        continue;
+      }
+      
+      // Calcular timestamp_original
       let timestampOriginal = reporte.timestamp_original;
-      if (!timestampOriginal) {
-        if (reporte.creadoEn) {
-          timestampOriginal = new Date(reporte.creadoEn).getTime();
-        } else if (reporte.fecha) {
-          timestampOriginal = new Date(reporte.fecha).getTime();
-        } else {
-          timestampOriginal = Date.now();
-        }
+      if (!timestampOriginal && reporte.creadoEn) {
+        timestampOriginal = new Date(reporte.creadoEn).getTime();
+      } else if (!timestampOriginal) {
+        timestampOriginal = Date.now();
       }
       
-      console.log(`   ✅ Nuevo reporte: ${reporte.titulo}, timestamp: ${timestampOriginal}`);
+      console.log(`   ✅ Nuevo reporte: ${reporte.titulo}`);
       
       const reporteLocal = {
         id: reporte._id,
@@ -154,7 +178,7 @@ export const pullReportesDelServidor = async (userId) => {
       guardados++;
     }
     
-    console.log(`✅ PULL completado: +${guardados} nuevos, ${duplicados} duplicados omitidos`);
+    console.log(`✅ PULL completado: +${guardados} nuevos, ${duplicados} omitidos`);
     
     if (guardados > 0) {
       await guardarUltimaSincronizacion(Date.now());

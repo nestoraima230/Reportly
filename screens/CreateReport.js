@@ -31,8 +31,8 @@ const obtenerColonia = async (lat, lon) => {
       address.village ||
       address.hamlet ||
       address.residential ||
-      address.city_district ||  
-      address.road ||           
+      address.city_district ||
+      address.road ||
       address.city ||
       "Desconocido"
     );
@@ -151,21 +151,31 @@ export default function CreateReport({ navigation }) {
     }
   };
 
+  // Cuando el usuario selecciona ubicación OFFLINE
   const handleLocationSelected = async (location) => {
     setSelectedLocation(location);
-    try {
-      const [geoInfo] = await Location.reverseGeocodeAsync({
-        latitude: location.latitude,
-        longitude: location.longitude,
-      });
 
-      if (geoInfo) {
-        const dir = `${geoInfo.name || ''} ${geoInfo.street || ''}, ${geoInfo.city || ''}, ${geoInfo.region || ''}, ${geoInfo.country || ''}`.trim();
-        setUbicacionTexto(dir);
+    // Siempre guardar las coordenadas, aunque no haya dirección
+    // La dirección se muestra como "Offline: lat, lng" si no hay internet
+    const hayInternet = await isConnected();
+
+    if (hayInternet) {
+      try {
+        const [geoInfo] = await Location.reverseGeocodeAsync({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+        if (geoInfo) {
+          const dir = `${geoInfo.name || ''} ${geoInfo.street || ''}, ${geoInfo.city || ''}`.trim();
+          setUbicacionTexto(dir || `📍 ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+        } else {
+          setUbicacionTexto(`📍 ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+        }
+      } catch (error) {
+        setUbicacionTexto(`📍 ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
       }
-    } catch (error) {
-      console.warn('Error reverse geocoding:', error);
-      setUbicacionTexto('');
+    } else {
+      setUbicacionTexto(`📍 Offline: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
     }
   };
 

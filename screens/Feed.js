@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 import { app } from '../config/firebaseConfig';
 
 // Importar servicios locales
-import { initLocalDB, getReportesLocales, resetearBaseDatosLocal } from '../services/LocalDB';
+import { initLocalDB, getReportesLocales, resetearBaseDatosLocal} from '../services/LocalDB';
 import { sincronizarCompleto, isConnected, iniciarSincronizacionAutomatica, detenerSincronizacionAutomatica } from '../services/SyncService';
 
 export default function Feed() {
@@ -43,12 +43,13 @@ export default function Feed() {
     // Transformar a formato compatible con el renderizado existente
     const reportesFormateados = reportesLocales.map(r => ({
       id: r.id,
+      _id: r.id,
       title: r.titulo,
       description: r.descripcion,
       image: r.foto_url,
       user: r.user_name || 'Anónimo',
-      direccion: r.direccion || 'Ubicación no disponible',
-      etiquetas: r.etiquetas || [],
+      direccion: r.direccion || null,
+      etiquetas: Array.isArray(r.etiquetas) ? r.etiquetas : [],
       estado: r.estado || 'pendiente',
       creadoEn: new Date(r.timestamp_original),
       ubicacion: { latitude: r.latitud, longitude: r.longitud },
@@ -57,25 +58,34 @@ export default function Feed() {
     setReportes(reportesFormateados);
   };
 
-  // Esto borra TODOS los reportes locales y los vuelve a descargar
   const resetearYReSincronizar = async () => {
-    console.log('🔄 Reseteando completamente...');
+    console.log('🔄 Reseteando y sincronizando...');
 
-    // 1. Limpiar toda la base de datos local
-    await resetearBaseDatosLocal();  // ← Nueva función
+    // Borrar todos los reportes locales
+    await limpiarDatosLocales();
+    console.log('🗑️ Todos los reportes eliminados');
 
-    // 2. Sincronizar para traer los reportes del servidor
+    // Sincronizar para traer los del servidor
     const userId = auth.currentUser?.uid;
     if (userId) {
       await sincronizarCompleto(userId);
     }
 
-    // 3. Recargar el feed
+    // Recargar feed
     await cargarReportesLocales();
-
     console.log('✅ Proceso completado');
   };
 
+  const obtenerTextoDireccion = (item) => {
+    if (item.direccion) {
+      return item.direccion;
+    }
+    if (item.ubicacion?.latitude && item.ubicacion?.longitude
+      && item.ubicacion.latitude !== 0 && item.ubicacion.longitude !== 0) {
+      return `📍 ${item.ubicacion.latitude.toFixed(4)}, ${item.ubicacion.longitude.toFixed(4)}`;
+    }
+    return 'Ubicación no disponible';
+  };
 
   const handleSync = async () => {
     const userId = auth.currentUser?.uid;
@@ -137,9 +147,9 @@ export default function Feed() {
   };
 
   const renderPost = ({ item }) => {
-    const direccionRecortada = item.direccion?.length > 50
-      ? item.direccion.slice(0, 50) + '...'
-      : item.direccion || 'Ubicación no disponible';
+    /*     const direccionRecortada = item.direccion?.length > 50
+          ? item.direccion.slice(0, 50) + '...'
+          : item.direccion || 'Ubicación no disponible'; */
 
     return (
       <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
@@ -175,7 +185,7 @@ export default function Feed() {
         <Text style={styles.description}>{item.description}</Text>
 
         {/* Dirección */}
-        <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
+        <Text style={styles.direccion}>📍 {obtenerTextoDireccion(item)}</Text>
 
         {/* Etiquetas */}
         {item.etiquetas?.length > 0 && (
@@ -215,22 +225,23 @@ export default function Feed() {
         </TouchableOpacity>
 
         {/* Botón temporal para limpiar duplicados */}
-        <TouchableOpacity
+{/*         <TouchableOpacity
           style={styles.clearButton}
-          onPress={resetearYReSincronizar}
+          onPress={resetearBaseDatosLocal}
         >
-          <Text style={styles.clearButtonText}>🗑️ Limpiar Duplicados</Text>
-        </TouchableOpacity>
+          <Text style={styles.clearButtonText}>🗑️ Limpiar Documentos</Text>
+        </TouchableOpacity> */}
 
         {syncStatus !== '' && (
           <Text style={styles.syncStatus}>{syncStatus}</Text>
         )}
       </View>
 
+
       {/* Lista de reportes */}
       <FlatList
         data={reportes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id} // o _id, pero consistente
         renderItem={renderPost}
         contentContainerStyle={styles.list}
         refreshing={refreshing}

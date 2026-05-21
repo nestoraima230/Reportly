@@ -328,13 +328,6 @@ export const verificarSiExisteReporte = (id) => {
 };
 
 /**
- * Limpiar reportes duplicados en SQLite (mantener solo uno por ID)
- */
-/**
- * Limpiar reportes duplicados en SQLite basado en título + timestamp
- * Mantener solo el más reciente (o el primero) de cada grupo duplicado
- */
-/**
  * Resetear completamente la base de datos local
  */
 export const resetearBaseDatosLocal = async () => {
@@ -353,3 +346,4 @@ export const resetearBaseDatosLocal = async () => {
     return Promise.reject(error);
   }
 };
+

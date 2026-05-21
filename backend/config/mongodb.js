@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const MONGO_URI =
-  'mongodb://localhost:27017/?directConnection=true';
+  'mongodb://localhost:27019/?directConnection=true';
 
 const DB_NAME = 'reportly';
 
