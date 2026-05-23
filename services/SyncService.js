@@ -7,6 +7,7 @@ import {
   getUltimaSincronizacion,
   guardarReporteLocal,
   verificarSiExisteReporte,
+  marcarSincronizadoConServidorId,
   getReportesLocales
 } from './LocalDB';
 
@@ -21,66 +22,130 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL; // ← CAMBIAR ANTES DE LA DEMO
 export const pushReportesPendientes = async (userId) => {
   try {
     console.log('🟡 PUSH: Buscando reportes pendientes...');
-    
+
     const pendientes = await getReportesPendientes();
-    
+
     // Filtrar solo los reportes del usuario actual
-    const misPendientes = pendientes.filter(r => r.user_id === userId);
-    
+    const misPendientes = pendientes.filter(
+      (r) => r.user_id === userId
+    );
+
     if (misPendientes.length === 0) {
       console.log('✅ No hay reportes pendientes');
-      return { success: true, subidos: 0 };
+
+      return {
+        success: true,
+        subidos: 0,
+      };
     }
-    
-    console.log(`📤 Subiendo ${misPendientes.length} reportes pendientes...`);
-    
+
+    console.log(
+      `📤 Subiendo ${misPendientes.length} reportes pendientes...`
+    );
+
     let subidos = 0;
     let errores = 0;
-    
+
     for (const reporte of misPendientes) {
       try {
         // Construir el objeto para enviar al servidor
         const reporteParaServidor = {
           titulo: reporte.titulo,
-          descripcion: reporte.descripion || reporte.descripcion,
+          descripcion: reporte.descripcion,
           ubicacion: {
             latitud: reporte.latitud,
-            longitud: reporte.longitud
+            longitud: reporte.longitud,
           },
           foto_url: reporte.foto_url,
           user_id: reporte.user_id,
           user_name: reporte.user_name,
-          timestamp_original: reporte.timestamp_original  // ← CLAVE: timestamp original
+          timestamp_original: reporte.timestamp_original,
         };
-        
+
+        // 📸 Subir imagen pendiente antes de enviar el reporte
+        if (reporte.imagen_pendiente && reporte.foto_local_uri) {
+          try {
+            console.log(
+              `   📸 Subiendo imagen pendiente para: ${reporte.titulo}`
+            );
+
+            const imagenURL = await subirImagenPendiente(
+              reporte.foto_local_uri
+            );
+
+            // Actualizar URL de imagen para enviar al servidor
+            reporteParaServidor.foto_url = imagenURL;
+
+            console.log(`   ✅ Imagen subida: ${imagenURL}`);
+          } catch (error) {
+            console.log(
+              `   ⚠️ No se pudo subir la imagen ahora, se reintentará después`
+            );
+
+            // No marcar como sincronizado si la imagen falla
+            continue;
+          }
+        }
+
+        // 🚀 Enviar reporte al servidor
         const response = await fetch(`${API_URL}/api/reportes`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(reporteParaServidor)
+          body: JSON.stringify(reporteParaServidor),
         });
-        
+
         if (response.ok) {
-          await marcarSincronizado(reporte.id);
+          const data = await response.json();
+
+          // 🔥 ID generado por MongoDB
+          const servidorId = data.insertedId;
+
+          // ✅ Marcar sincronizado y guardar servidor_id
+          await marcarSincronizadoConServidorId(
+            reporte.id,
+            servidorId
+          );
+
           subidos++;
-          console.log(`   ✅ ${reporte.titulo} sincronizado`);
+
+          console.log(
+            `   ✅ ${reporte.titulo} sincronizado (servidor_id: ${servidorId})`
+          );
         } else {
           errores++;
-          console.log(`   ❌ Error al sincronizar ${reporte.titulo}: ${response.status}`);
+
+          console.log(
+            `   ❌ Error al sincronizar ${reporte.titulo}: ${response.status}`
+          );
         }
       } catch (error) {
         errores++;
-        console.log(`   ❌ Error de red al sincronizar ${reporte.titulo}:`, error.message);
+
+        console.log(
+          `   ❌ Error de red al sincronizar ${reporte.titulo}:`,
+          error.message
+        );
       }
     }
-    
-    console.log(`✅ PUSH completado: ${subidos} subidos, ${errores} errores`);
-    return { success: true, subidos, errores };
-    
+
+    console.log(
+      `✅ PUSH completado: ${subidos} subidos, ${errores} errores`
+    );
+
+    return {
+      success: true,
+      subidos,
+      errores,
+    };
   } catch (error) {
     console.error('❌ Error en pushReportesPendientes:', error);
-    return { success: false, error: error.message };
+
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 };
 
@@ -90,75 +155,92 @@ export const pushReportesPendientes = async (userId) => {
 export const pullReportesDelServidor = async (userId) => {
   try {
     console.log('🟡 PULL: Descargando reportes del servidor...');
-    
+
     const url = `${API_URL}/api/reportes/usuario/${userId}`;
     console.log(`   URL: ${url}`);
-    
+
     const response = await fetch(url);
-    console.log(`   Status: ${response.status}`);
-    
+    if (!response.ok) {
+      console.log(`   ❌ HTTP Error: ${response.status}`);
+      return { success: false, guardados: 0, error: `HTTP ${response.status}` };
+    }
+
     const data = await response.json();
-    
+
     if (!data.success) {
-      console.log(`   ⚠️ success: false`);
+      console.log(`   ⚠️ API success: false`);
       return { success: false, guardados: 0 };
     }
-    
+
     const reportesServidor = data.data || [];
     console.log(`   📥 Reportes del servidor: ${reportesServidor.length}`);
-    
-    // Obtener IDs de reportes que YA existen localmente (para evitar duplicados)
+
+    // 🔥 Obtener reportes locales para verificar duplicados por servidor_id
     const reportesLocales = await getReportesLocales();
-    const idsLocales = new Set(reportesLocales.map(r => r.id));
-    const titulosLocales = new Set(reportesLocales.map(r => r.titulo));
     
+    // Crear un Set con los servidor_id que YA tenemos en SQLite
+    const servidorIdsLocales = new Set(
+      reportesLocales.filter(r => r.servidor_id).map(r => r.servidor_id)
+    );
+    
+    // También un Set con los IDs locales (UUIDs) por si acaso
+    const idsLocales = new Set(reportesLocales.map(r => r.id));
+
     let guardados = 0;
     let duplicados = 0;
-    
+    let invalidos = 0;
+
     for (const reporte of reportesServidor) {
-      // 🔥 CRITERIO 1: Si el ID ya existe localmente, omitir
-      if (idsLocales.has(reporte._id)) {
-        console.log(`   ⏭️ Duplicado por ID omitido: ${reporte.titulo}`);
+      const servidorId = reporte._id;
+      
+      // 🔥 CRITERIO 1: Si YA tenemos este servidor_id localmente → DUPLICADO
+      if (servidorIdsLocales.has(servidorId)) {
+        console.log(`   ⏭️ DUPLICADO (servidor_id ya existe): ${reporte.titulo} (${servidorId})`);
         duplicados++;
         continue;
       }
       
-      // 🔥 CRITERIO 2: Si el título ya existe localmente Y fue creado recientemente (última hora), omitir
-      const tituloExistente = titulosLocales.has(reporte.titulo);
-      const tiempoServidor = new Date(reporte.creadoEn).getTime();
-      const ahora = Date.now();
-      const esReciente = (ahora - tiempoServidor) < 3600000; // 1 hora
+      // 🔥 CRITERIO 2: Si el UUID local coincide con algún reporte pendiente
+      // Buscar si hay un reporte local pendiente con el mismo título y timestamp cercano
+      const pendienteRelacionado = reportesLocales.find(r => 
+        r.sincronizado === 0 && 
+        r.titulo === reporte.titulo &&
+        Math.abs(r.timestamp_original - new Date(reporte.creadoEn).getTime()) < 60000 // 1 minuto
+      );
       
-      if (tituloExistente && esReciente) {
-        console.log(`   ⏭️ Duplicado por título omitido: ${reporte.titulo}`);
+      if (pendienteRelacionado) {
+        console.log(`   🔗 Vinculando reporte pendiente con servidor_id: ${pendienteRelacionado.id} -> ${servidorId}`);
+        // Actualizar el reporte pendiente con el servidor_id
+        await marcarSincronizadoConServidorId(pendienteRelacionado.id, servidorId);
         duplicados++;
         continue;
       }
-      
-      // Validar que tenga coordenadas válidas
-      const tieneUbicacion = reporte.ubicacion && 
+
+      // Validar que tenga ubicación válida
+      const tieneUbicacion = reporte.ubicacion &&
                              reporte.ubicacion.coordinates &&
                              reporte.ubicacion.coordinates[0] !== 0 &&
                              reporte.ubicacion.coordinates[1] !== 0;
-      
+
       if (!tieneUbicacion) {
-        console.log(`   ⏭️ Sin ubicación válida omitido: ${reporte.titulo}`);
-        duplicados++;
+        console.log(`   ⏭️ INVÁLIDO (sin ubicación): ${reporte.titulo}`);
+        invalidos++;
         continue;
       }
-      
-      // Calcular timestamp_original
+
       let timestampOriginal = reporte.timestamp_original;
       if (!timestampOriginal && reporte.creadoEn) {
         timestampOriginal = new Date(reporte.creadoEn).getTime();
       } else if (!timestampOriginal) {
         timestampOriginal = Date.now();
       }
-      
-      console.log(`   ✅ Nuevo reporte: ${reporte.titulo}`);
-      
+
+      console.log(`   ✅ NUEVO reporte: ${reporte.titulo} (servidor_id: ${servidorId})`);
+
+      // Guardar usando el ID del servidor como identificador principal
       const reporteLocal = {
-        id: reporte._id,
+        id: servidorId,  // ← AHORA USA EL ID DEL SERVIDOR
+        servidor_id: servidorId,
         titulo: reporte.titulo,
         descripcion: reporte.descripcion || '',
         latitud: reporte.ubicacion?.coordinates?.[1] || 0,
@@ -173,22 +255,55 @@ export const pullReportesDelServidor = async (userId) => {
         etiquetas: reporte.etiquetas || [],
         estado: reporte.estado || 'pendiente'
       };
-      
+
       await guardarReporteLocal(reporteLocal);
       guardados++;
+      
+      // Agregar al Set para evitar duplicados en esta misma ejecución
+      servidorIdsLocales.add(servidorId);
     }
-    
-    console.log(`✅ PULL completado: +${guardados} nuevos, ${duplicados} omitidos`);
+
+    console.log(`✅ PULL completado: +${guardados} nuevos, ${duplicados} duplicados/vinculados, ${invalidos} inválidos`);
     
     if (guardados > 0) {
       await guardarUltimaSincronizacion(Date.now());
     }
-    
-    return { success: true, guardados };
-    
+
+    return { success: true, guardados, duplicados, invalidos };
+
   } catch (error) {
     console.error('❌ Error en pullReportesDelServidor:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.message, guardados: 0 };
+  }
+};
+
+/**
+ * Subir una imagen pendiente a Cloudinary
+ */
+const subirImagenPendiente = async (uri) => {
+  try {
+    const data = new FormData();
+    data.append("file", {
+      uri: uri,
+      type: "image/jpeg",
+      name: "reporte_pendiente.jpg",
+    });
+    data.append("upload_preset", "report");
+    data.append("cloud_name", "dcsa4u3cj");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dcsa4u3cj/image/upload",
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+    return result.secure_url;
+  } catch (error) {
+    console.error("Error subiendo imagen pendiente:", error);
+    throw error;
   }
 };
 

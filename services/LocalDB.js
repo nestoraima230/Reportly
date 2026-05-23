@@ -26,7 +26,7 @@ const ejecutarSelect = (query, params = []) => {
   try {
     // Usar getAllSync directamente para SELECTs simples
     const result = db.getAllSync(query, params);
-    
+
     // result ya es un array de objetos directamente
     const rows = result.map(row => ({
       ...row,
@@ -35,7 +35,7 @@ const ejecutarSelect = (query, params = []) => {
       timestamp_original: row.timestamp_original ? parseInt(row.timestamp_original) : 0,
       sincronizado: row.sincronizado ? parseInt(row.sincronizado) : 0
     }));
-    
+
     return rows;
   } catch (error) {
     console.error('Error en select:', error);
@@ -51,24 +51,27 @@ export const initLocalDB = () => {
     // Tabla de reportes locales
     ejecutarConsulta(`
       CREATE TABLE IF NOT EXISTS reportes_locales (
-        id TEXT PRIMARY KEY,
-        titulo TEXT NOT NULL,
-        descripcion TEXT,
-        latitud REAL,
-        longitud REAL,
-        foto_url TEXT,
-        timestamp_original INTEGER NOT NULL,
-        sincronizado INTEGER DEFAULT 0,
-        user_id TEXT NOT NULL,
-        user_name TEXT,
-        direccion TEXT,
-        colonia TEXT,
-        etiquetas TEXT,
-        estado TEXT
+       id TEXT PRIMARY KEY,
+       servidor_id TEXT, 
+       titulo TEXT NOT NULL,
+       descripcion TEXT,
+       latitud REAL,
+       longitud REAL,
+       foto_url TEXT,
+       foto_local_uri TEXT,
+       timestamp_original INTEGER NOT NULL,
+       sincronizado INTEGER DEFAULT 0,
+       user_id TEXT NOT NULL,
+       user_name TEXT,
+       direccion TEXT,
+       colonia TEXT,
+       etiquetas TEXT,
+       estado TEXT,
+       imagen_pendiente INTEGER DEFAULT 0
       );
     `);
     console.log('✅ Tabla reportes_locales lista');
-    
+
     // Tabla de metadatos
     ejecutarConsulta(`
       CREATE TABLE IF NOT EXISTS sync_metadata (
@@ -77,7 +80,7 @@ export const initLocalDB = () => {
       );
     `);
     console.log('✅ Tabla sync_metadata lista');
-    
+
     return Promise.resolve();
   } catch (error) {
     console.error('❌ Error inicializando:', error);
@@ -94,16 +97,19 @@ export const guardarReporteLocal = (reporte) => {
     
     ejecutarConsulta(
       `INSERT OR REPLACE INTO reportes_locales 
-       (id, titulo, descripcion, latitud, longitud, foto_url, timestamp_original, 
-        sincronizado, user_id, user_name, direccion, colonia, etiquetas, estado)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+       (id, servidor_id, titulo, descripcion, latitud, longitud, foto_url, foto_local_uri, 
+        timestamp_original, sincronizado, user_id, user_name, direccion, colonia, etiquetas, 
+        estado, imagen_pendiente)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         reporte.id,
+        reporte.servidor_id || null,
         reporte.titulo,
         reporte.descripcion || '',
         reporte.latitud || 0,
         reporte.longitud || 0,
         reporte.foto_url || null,
+        reporte.foto_local_uri || null,
         reporte.timestamp_original,
         reporte.sincronizado ? 1 : 0,
         reporte.user_id,
@@ -111,7 +117,8 @@ export const guardarReporteLocal = (reporte) => {
         reporte.direccion || '',
         reporte.colonia || '',
         etiquetasStr,
-        reporte.estado || 'pendiente'
+        reporte.estado || 'pendiente',
+        reporte.imagen_pendiente ? 1 : 0
       ]
     );
     console.log('✅ Reporte guardado:', reporte.id);
@@ -133,6 +140,7 @@ export const getReportesLocales = () => {
     
     const reportes = rows.map(row => ({
       id: row.id,
+      servidor_id: row.servidor_id,
       titulo: row.titulo,
       descripcion: row.descripcion,
       latitud: row.latitud,
@@ -164,7 +172,7 @@ export const getReportesPendientes = () => {
     const rows = ejecutarSelect(
       `SELECT * FROM reportes_locales WHERE sincronizado = 0 ORDER BY timestamp_original ASC;`
     );
-    
+
     const reportes = rows.map(row => ({
       id: row.id,
       titulo: row.titulo,
@@ -181,7 +189,7 @@ export const getReportesPendientes = () => {
       etiquetas: row.etiquetas ? JSON.parse(row.etiquetas) : [],
       estado: row.estado
     }));
-    
+
     console.log(`📤 ${reportes.length} pendientes`);
     return Promise.resolve(reportes);
   } catch (error) {
@@ -295,7 +303,7 @@ export const getConteoReportes = () => {
         SUM(CASE WHEN sincronizado = 1 THEN 1 ELSE 0 END) as sincronizados
       FROM reportes_locales;
     `);
-    
+
     if (rows.length > 0) {
       return Promise.resolve({
         total: rows[0].total || 0,
@@ -335,11 +343,11 @@ export const resetearBaseDatosLocal = async () => {
     // Borrar todos los reportes
     ejecutarConsulta(`DELETE FROM reportes_locales;`);
     console.log('🗑️ Todos los reportes eliminados');
-    
+
     // Reiniciar la metadata de sincronización
     ejecutarConsulta(`DELETE FROM sync_metadata;`);
     console.log('🗑️ Metadata reiniciada');
-    
+
     return Promise.resolve();
   } catch (error) {
     console.error('❌ Error reseteando:', error);
@@ -347,3 +355,21 @@ export const resetearBaseDatosLocal = async () => {
   }
 };
 
+/**
+ * Marcar reporte como sincronizado y guardar el ID del servidor
+ */
+export const marcarSincronizadoConServidorId = (localId, servidorId) => {
+  try {
+    ejecutarConsulta(
+      `UPDATE reportes_locales 
+       SET sincronizado = 1, servidor_id = ? 
+       WHERE id = ?;`,
+      [servidorId, localId]
+    );
+    console.log(`✅ Marcado sincronizado: ${localId} -> servidor_id: ${servidorId}`);
+    return Promise.resolve();
+  } catch (error) {
+    console.error('❌ Error marcando sincronizado:', error);
+    return Promise.reject(error);
+  }
+};

@@ -186,15 +186,34 @@ export default function CreateReport({ navigation }) {
     }
 
     setLoading(true);
+
     let imagenURL = '';
+    let imagenLocalUri = null;
 
     try {
       const userId = auth.currentUser?.uid || 'anonymous';
       const userName = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Anónimo';
 
+      const hayInternet = await isConnected();
+
       // Subir imagen a Cloudinary si existe
       if (imagen) {
-        imagenURL = await subirImagen(imagen);
+        if (hayInternet) {
+          // Si hay internet, subir la imagen normalmente
+          try {
+            imagenURL = await subirImagen(imagen);
+            console.log('✅ Imagen subida a Cloudinary:', imagenURL);
+          } catch (error) {
+            console.error('Error subiendo imagen:', error);
+            // Si falla la subida, guardar la URI local para subirla después
+            imagenLocalUri = imagen;
+            Alert.alert('⚠️ Imagen pendiente', 'La imagen se subirá cuando tengas conexión estable.');
+          }
+        } else {
+          // Si NO hay internet, guardar la URI local para subirla después
+          imagenLocalUri = imagen;
+          console.log('📱 Modo offline: imagen guardada localmente para subir después');
+        }
       }
 
       // Obtener colonia
@@ -211,6 +230,7 @@ export default function CreateReport({ navigation }) {
         latitud: selectedLocation.latitude,
         longitud: selectedLocation.longitude,
         foto_url: imagenURL,
+        foto_local_uri: imagenLocalUri,
         timestamp_original: Date.now(),  // ← CLAVE: se guarda AHORA
         sincronizado: 0,  // Pendiente de sincronizar
         user_id: userId,
@@ -219,16 +239,21 @@ export default function CreateReport({ navigation }) {
         direccion: ubicacionTexto,
         colonia: colonia,
         etiquetas: etiquetas.split(',').map(e => e.trim()),
-        estado: "pendiente"
+        estado: "pendiente",
+        imagen_pendiente: imagenLocalUri !== null
       };
 
       // Guardar en SQLite local
       await guardarReporteLocal(nuevoReporte);
 
-      Alert.alert('¡Reporte guardado!', `Tu reporte "${titulo}" se ha guardado localmente. Se sincronizará cuando tengas conexión.`);
+      const mensaje = `Tu reporte "${titulo}" se guardó localmente.${imagenLocalUri
+          ? ' La imagen se subirá cuando tengas conexión.'
+          : ' Se sincronizará cuando tengas conexión.'
+        }`;
+
+      Alert.alert('¡Reporte guardado!', mensaje);
 
       // Intentar sincronizar inmediatamente si hay internet
-      const hayInternet = await isConnected();
       if (hayInternet) {
         const resultado = await sincronizarCompleto(userId);
         if (resultado.subidos > 0) {

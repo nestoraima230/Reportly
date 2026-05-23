@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 import { app } from '../config/firebaseConfig';
 
 // Importar servicios locales
-import { initLocalDB, getReportesLocales, resetearBaseDatosLocal} from '../services/LocalDB';
+import { initLocalDB, getReportesLocales, resetearBaseDatosLocal, limpiarDatosLocales, guardarReporteLocal } from '../services/LocalDB';
 import { sincronizarCompleto, isConnected, iniciarSincronizacionAutomatica, detenerSincronizacionAutomatica } from '../services/SyncService';
 
 export default function Feed() {
@@ -85,6 +85,39 @@ export default function Feed() {
       return `📍 ${item.ubicacion.latitude.toFixed(4)}, ${item.ubicacion.longitude.toFixed(4)}`;
     }
     return 'Ubicación no disponible';
+  };
+
+  const limpiarDuplicadosCompletamente = async () => {
+    const reportes = await getReportesLocales();
+
+    // Agrupar por servidor_id (si existe) o por título + timestamp cercano
+    const mapa = new Map();
+
+    for (const r of reportes) {
+      let clave = null;
+
+      if (r.servidor_id) {
+        clave = r.servidor_id;
+      } else {
+        // Para reportes pendientes, usar título + timestamp aproximado
+        clave = `${r.titulo}_${Math.floor(r.timestamp_original / 60000)}`;
+      }
+
+      if (!mapa.has(clave) || (r.sincronizado === 1 && mapa.get(clave).sincronizado === 0)) {
+        mapa.set(clave, r);
+      }
+    }
+
+    const unicos = Array.from(mapa.values());
+    console.log(`Originales: ${reportes.length}, Únicos: ${unicos.length}`);
+
+    await limpiarDatosLocales();
+    for (const r of unicos) {
+      await guardarReporteLocal(r);
+    }
+
+    await cargarReportesLocales();
+    alert(`Duplicados eliminados: ${reportes.length - unicos.length}`);
   };
 
   const handleSync = async () => {
@@ -224,13 +257,13 @@ export default function Feed() {
           </Text>
         </TouchableOpacity>
 
-        {/* Botón temporal para limpiar duplicados */}
-{/*         <TouchableOpacity
+        {/* Botón temporal para eliminar reportes */}
+        <TouchableOpacity
           style={styles.clearButton}
           onPress={resetearBaseDatosLocal}
         >
-          <Text style={styles.clearButtonText}>🗑️ Limpiar Documentos</Text>
-        </TouchableOpacity> */}
+          <Text style={styles.clearButtonText}>🗑️ Limpiar Reportes</Text>
+        </TouchableOpacity>
 
         {syncStatus !== '' && (
           <Text style={styles.syncStatus}>{syncStatus}</Text>
