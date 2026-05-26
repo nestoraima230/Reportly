@@ -11,8 +11,8 @@ import { sincronizarCompleto, isConnected, iniciarSincronizacionAutomatica, dete
 export default function Feed() {
   const [reportes, setReportes] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
+  //const [isSyncing, setIsSyncing] = useState(false);
+  //const [syncStatus, setSyncStatus] = useState('');
   const navigation = useNavigation();
   const auth = getAuth(app);
   console.log('📱 Usuario actual UID:', auth.currentUser?.uid);
@@ -46,7 +46,7 @@ export default function Feed() {
       _id: r.id,
       title: r.titulo,
       description: r.descripcion,
-      image: r.foto_url,
+      image: r.foto_url || r.foto_local_uri,
       user: r.user_name || 'Anónimo',
       direccion: r.direccion || null,
       etiquetas: Array.isArray(r.etiquetas) ? r.etiquetas : [],
@@ -120,40 +120,40 @@ export default function Feed() {
     alert(`Duplicados eliminados: ${reportes.length - unicos.length}`);
   };
 
-  const handleSync = async () => {
-    const userId = auth.currentUser?.uid;
-    if (!userId) {
-      Alert.alert('Error', 'Debes iniciar sesión para sincronizar');
-      return;
-    }
-
-    setIsSyncing(true);
-    setSyncStatus('Verificando conexión...');
-
-    const hayInternet = await isConnected();
-    if (!hayInternet) {
-      Alert.alert('⚠️ Sin conexión', 'No hay internet. Los reportes se sincronizarán cuando tengas conexión.');
+  /*   const handleSync = async () => {
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        Alert.alert('Error', 'Debes iniciar sesión para sincronizar');
+        return;
+      }
+  
+      setIsSyncing(true);
+      setSyncStatus('Verificando conexión...');
+  
+      const hayInternet = await isConnected();
+      if (!hayInternet) {
+        Alert.alert('⚠️ Sin conexión', 'No hay internet. Los reportes se sincronizarán cuando tengas conexión.');
+        setIsSyncing(false);
+        setSyncStatus('');
+        return;
+      }
+  
+      setSyncStatus('Sincronizando con el servidor...');
+      const resultado = await sincronizarCompleto(userId);
+  
+      if (resultado.success) {
+        await cargarReportesLocales();
+        Alert.alert(
+          '✅ Sincronización completada',
+          `📤 Subidos: ${resultado.subidos}\n📥 Descargados: ${resultado.descargados}\n${resultado.errores > 0 ? `⚠️ Errores: ${resultado.errores}` : ''}`
+        );
+      } else {
+        Alert.alert('❌ Error', resultado.error || 'Error en la sincronización');
+      }
+  
       setIsSyncing(false);
       setSyncStatus('');
-      return;
-    }
-
-    setSyncStatus('Sincronizando con el servidor...');
-    const resultado = await sincronizarCompleto(userId);
-
-    if (resultado.success) {
-      await cargarReportesLocales();
-      Alert.alert(
-        '✅ Sincronización completada',
-        `📤 Subidos: ${resultado.subidos}\n📥 Descargados: ${resultado.descargados}\n${resultado.errores > 0 ? `⚠️ Errores: ${resultado.errores}` : ''}`
-      );
-    } else {
-      Alert.alert('❌ Error', resultado.error || 'Error en la sincronización');
-    }
-
-    setIsSyncing(false);
-    setSyncStatus('');
-  };
+    }; */
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -247,27 +247,21 @@ export default function Feed() {
     <View style={styles.container}>
       {/* Barra de sincronización */}
       <View style={styles.syncBar}>
-        <TouchableOpacity
-          style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}
-          onPress={handleSync}
-          disabled={isSyncing}
-        >
-          <Text style={styles.syncButtonText}>
-            {isSyncing ? '🔄 Sincronizando...' : '🔄 Sincronizar'}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.syncInfo}>
+          🔄 Sincronización automática activada
+        </Text>
 
-        {/* Botón temporal para eliminar reportes */}
         <TouchableOpacity
           style={styles.clearButton}
-          onPress={resetearBaseDatosLocal}
+          onPress={async () => {
+            await resetearBaseDatosLocal();
+            await cargarReportesLocales();
+          }}
         >
-          <Text style={styles.clearButtonText}>🗑️ Limpiar Reportes</Text>
+          <Text style={styles.clearButtonText}>
+            🗑️ Limpiar
+          </Text>
         </TouchableOpacity>
-
-        {syncStatus !== '' && (
-          <Text style={styles.syncStatus}>{syncStatus}</Text>
-        )}
       </View>
 
 
@@ -396,5 +390,9 @@ const styles = StyleSheet.create({
     color: '#FF9800',
     fontSize: 12,
     textAlign: 'center',
+  },
+  syncInfo: {
+    fontSize: 14,
+    color: '#444',
   },
 });

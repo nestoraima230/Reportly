@@ -94,7 +94,7 @@ export const initLocalDB = () => {
 export const guardarReporteLocal = (reporte) => {
   try {
     const etiquetasStr = reporte.etiquetas ? JSON.stringify(reporte.etiquetas) : '[]';
-    
+
     ejecutarConsulta(
       `INSERT OR REPLACE INTO reportes_locales 
        (id, servidor_id, titulo, descripcion, latitud, longitud, foto_url, foto_local_uri, 
@@ -137,7 +137,7 @@ export const getReportesLocales = () => {
     const rows = ejecutarSelect(
       `SELECT * FROM reportes_locales ORDER BY timestamp_original DESC;`
     );
-    
+
     const reportes = rows.map(row => ({
       id: row.id,
       servidor_id: row.servidor_id,
@@ -146,16 +146,18 @@ export const getReportesLocales = () => {
       latitud: row.latitud,
       longitud: row.longitud,
       foto_url: row.foto_url,
+      foto_local_uri: row.foto_local_uri,
       timestamp_original: row.timestamp_original,
-      sincronizado: row.sincronizado === 1,
+      sincronizado: row.sincronizado,
       user_id: row.user_id,
       user_name: row.user_name,
       direccion: row.direccion,
       colonia: row.colonia,
       etiquetas: row.etiquetas ? JSON.parse(row.etiquetas) : [],
-      estado: row.estado
+      estado: row.estado,
+      imagen_pendiente: row.imagen_pendiente
     }));
-    
+
     console.log(`📖 ${reportes.length} reportes locales`);
     return Promise.resolve(reportes);
   } catch (error) {
@@ -180,6 +182,8 @@ export const getReportesPendientes = () => {
       latitud: row.latitud,
       longitud: row.longitud,
       foto_url: row.foto_url,
+      foto_local_uri: row.foto_local_uri,
+      imagen_pendiente: Number(row.imagen_pendiente),
       timestamp_original: row.timestamp_original,
       sincronizado: row.sincronizado === 1,
       user_id: row.user_id,

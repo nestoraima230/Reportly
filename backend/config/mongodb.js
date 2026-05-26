@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const MONGO_URI =
-  'mongodb://localhost:27019/?directConnection=true';
+const MONGO_URI =   'mongodb://reportly-mongo1:27017,reportly-mongo2:27017,reportly-mongo3:27017/reportly?replicaSet=rs0';
 
 const DB_NAME = 'reportly';
 

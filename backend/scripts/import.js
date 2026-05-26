@@ -8,7 +8,7 @@ const path = require('path');
 
 // URI DEL REPLICA SET
 const MONGODB_URI =
-  'mongodb://localhost:27017/?directConnection=true';
+  'mongodb://reportly-mongo1:27017,reportly-mongo2:27017,reportly-mongo3:27017/reportly?replicaSet=rs0';
 
 // Nombre de la BD
 const DATABASE_NAME = 'reportly';
