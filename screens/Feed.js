@@ -253,10 +253,23 @@ export default function Feed() {
 
         <TouchableOpacity
           style={styles.clearButton}
-          onPress={async () => {
-            await resetearBaseDatosLocal();
-            await cargarReportesLocales();
-          }}
+onPress={async () => {
+
+  // Borrar SQLite local
+  await resetearBaseDatosLocal();
+
+  // Obtener UID
+  const userId = auth.currentUser?.uid;
+
+  // Volver a descargar desde Mongo
+  if (userId) {
+    await sincronizarCompleto(userId);
+  }
+
+  // Recargar feed
+  await cargarReportesLocales();
+
+}}
         >
           <Text style={styles.clearButtonText}>
             🗑️ Limpiar

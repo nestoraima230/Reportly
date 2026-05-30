@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # MongoDB Nodo 1 - PRIMARY
   mongo1:
     image: mongo:6
     container_name: reportly-mongo1
@@ -9,7 +10,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo1_data:/data/db
+    networks:
+      - reportly_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # MongoDB Nodo 2 - SECONDARY
   mongo2:
     image: mongo:6
     container_name: reportly-mongo2
@@ -18,7 +27,15 @@ services:
       - "27018:27017"
     volumes:
       - mongo2_data:/data/db
+    networks:
+      - reportly_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # MongoDB Nodo 3 - SECONDARY
   mongo3:
     image: mongo:6
     container_name: reportly-mongo3
@@ -27,6 +44,67 @@ services:
       - "27019:27017"
     volumes:
       - mongo3_data:/data/db
+    networks:
+      - reportly_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Inicializador del Replica Set
+  mongo-init:
+    image: mongo:6
+    container_name: reportly-mongo-init
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    networks:
+      - reportly_network
+    command: >
+      bash -c "
+        echo '=== INICIALIZANDO REPLICA SET ===' &&
+        sleep 5 &&
+        mongosh mongodb://mongo1:27017 --eval '
+          rs.initiate({
+            _id: \"rs0\",
+            members: [
+              { _id: 0, host: \"mongo1:27017\" },
+              { _id: 1, host: \"mongo2:27017\" },
+              { _id: 2, host: \"mongo3:27017\" }
+            ]
+          })
+        ' &&
+        echo '=== ESPERANDO 10 SEGUNDOS ===' &&
+        sleep 10 &&
+        echo '=== ESTADO DEL REPLICA SET ===' &&
+        mongosh mongodb://mongo1:27017 --eval 'rs.status().members.forEach(m => print(m.name + \" : \" + m.stateStr))'
+      "
+    restart: "no"
+
+  # Backend Express
+  backend:
+    build: ../backend
+    container_name: reportly-backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    environment:
+      - MONGO_URI=mongodb://mongo1:27017,mongo2:27017,mongo3:27017/reportly?replicaSet=rs0
+      - PORT=3000
+    networks:
+      - reportly_network
+    restart: on-failure
+
+networks:
+  reportly_network:
+    driver: bridge
 
 volumes:
   mongo1_data:

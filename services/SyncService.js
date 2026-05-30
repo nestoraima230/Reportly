@@ -14,7 +14,13 @@ import {
 // IMPORTANTE: Cambiar esta IP por la IP de tu computadora en la red local
 // Para desarrollo con Expo: usa la IP de tu máquina (no localhost)
 // Ejemplo: 'http://192.168.1.100:3000'
-const API_URL = process.env.EXPO_PUBLIC_API_URL; // ← CAMBIAR ANTES DE LA DEMO
+
+const API_URL = 'http://192.168.1.79:3000'
+console.log("API URL:", process.env.EXPO_PUBLIC_API_URL2);
+console.log(
+  "ENV REAL:",
+  process.env.EXPO_PUBLIC_API_URL
+);
 let sincronizando = false;
 
 /**

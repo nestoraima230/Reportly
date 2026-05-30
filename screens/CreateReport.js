@@ -175,7 +175,7 @@ export default function CreateReport({ navigation }) {
         setUbicacionTexto(`📍 ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
       }
     } else {
-      setUbicacionTexto(`📍 Offline: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+      setUbicacionTexto(`Offline: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
     }
   };
 
