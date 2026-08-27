@@ -5,14 +5,16 @@ import {
 } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import Constants from 'expo-constants';
+
+const extra = Constants.expoConfig?.extra || {};
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB4jy6tWPZPATYoxcvmDvfYOCs3fRIKygU",
-  authDomain: "reportly-2ab0a.firebaseapp.com",
-  projectId: "reportly-2ab0a",
-  storageBucket: "reportly-2ab0a.appspot.com", 
-  appId: "1:11492335753:web:0ea4c7415c60977c812658"
+  apiKey: extra.firebaseApiKey || "AIzaSyB4jy6tWPZPATYoxcvmDvfYOCs3fRIKygU",
+  authDomain: extra.firebaseAuthDomain || "reportly-2ab0a.firebaseapp.com",
+  projectId: extra.firebaseProjectId || "reportly-2ab0a",
+  storageBucket: extra.firebaseStorageBucket || "reportly-2ab0a.appspot.com", 
+  appId: extra.firebaseAppId || "1:11492335753:web:0ea4c7415c60977c812658"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -22,6 +24,5 @@ const auth = initializeAuth(app, {
 });
 
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-export { app, auth, db, storage };
+export { app, auth, db };

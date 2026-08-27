@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig'; // o desde firebaseConfig.js si ya lo tienes ahí
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
+import { ROLES } from '../constants/roles';
 
 const db = getFirestore(app);
 
@@ -22,13 +23,15 @@ export const AuthProvider = ({ children }) => {
         try {
           const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid));
           if (userDoc.exists()) {
-            setUserRole(userDoc.data().rol || 'usuario');
+            const rawRole = userDoc.data()?.rol;
+            const normalizedRole = rawRole === 'usuario' ? ROLES.USER : (rawRole || ROLES.USER);
+            setUserRole(normalizedRole);
           } else {
-            setUserRole('usuario');
+            setUserRole(ROLES.USER);
           }
         } catch (error) {
           console.error('Error al obtener el rol:', error);
-          setUserRole('usuario');
+          setUserRole(ROLES.USER);
         }
 
       } else {

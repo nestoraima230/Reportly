@@ -4,6 +4,7 @@ import { doc, updateDoc, serverTimestamp, getFirestore } from 'firebase/firestor
 import { app } from '../config/firebaseConfig';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { ROLES } from '../constants/roles';
 
 const db = getFirestore(app);
 
@@ -95,7 +96,7 @@ export default function ReportDetail({ route }) {
 
       </View>
 
-      {userRole === 'admin' && report.id && (
+      {userRole === ROLES.ADMIN && report.id && (
         <View style={{ marginTop: 20 }}>
           <Button title="Marcar como Resuelto" onPress={() => actualizarEstado('resuelto')} />
           <Button title="Marcar como No Resuelto" onPress={() => actualizarEstado('no_resuelto')} />

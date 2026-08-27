@@ -34,7 +34,12 @@
     "extra": {
       "eas": {
         "projectId": "52f230a3-cd59-4f33-8b0e-a32d512927cc"
-      }
+      },
+      "firebaseApiKey": "AIzaSyB4jy6tWPZPATYoxcvmDvfYOCs3fRIKygU",
+      "firebaseAuthDomain": "reportly-2ab0a.firebaseapp.com",
+      "firebaseProjectId": "reportly-2ab0a",
+      "firebaseStorageBucket": "reportly-2ab0a.appspot.com",
+      "firebaseAppId": "1:11492335753:web:0ea4c7415c60977c812658"
     }
   }
 }

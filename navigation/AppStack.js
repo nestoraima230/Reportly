@@ -5,6 +5,7 @@ import ReportDetail from '../screens/ReportDetail';
 import AdminPanel from "../utils/adminPanel";
 import MapScreen from "../screens/MapScreen";
 import { AuthContext } from "../context/AuthContext";
+import { ROLES } from "../constants/roles";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +35,7 @@ export default function AppStack() {
         options={{ title: 'Ubicación del Reporte' }}
       />
 
-      {userRole === 'admin' && (
+      {userRole === ROLES.ADMIN && (
         <Stack.Screen name="AdminPanel" component={AdminPanel} />
       )}
     </Stack.Navigator>

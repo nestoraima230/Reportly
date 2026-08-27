@@ -11,6 +11,7 @@ import { getAuth } from 'firebase/auth';
 import { app, db } from '../config/firebaseConfig';
 import UbicationSelector from '../utils/ubicationSelector';
 import { useFocusEffect } from '@react-navigation/native';
+import { subirImagen } from '../utils/subirImagen';
 
 
 
@@ -111,41 +112,6 @@ export default function CreateReport({ navigation }) {
       Alert.alert('Error', 'No se pudo abrir la cámara.');
     }
   };
-
-const subirImagen = async (uri) => {
-  try {
-    // 1. Comprimir imagen primero
-    const compressed = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 1080 } }],  // HD pero liviana
-      { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
-    );
-
-    const data = new FormData();
-    data.append("file", {
-      uri: compressed.uri,
-      type: "image/jpeg",
-      name: "reporte_comprimido.jpg",
-    });
-    data.append("upload_preset", "report");
-    data.append("cloud_name", "dcsa4u3cj");
-
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dcsa4u3cj/image/upload",
-      {
-        method: "POST",
-        body: data,
-      }
-    );
-
-    const result = await res.json();
-    return result.secure_url;
-
-  } catch (error) {
-    console.error("Error subiendo imagen:", error);
-    throw error;
-  }
-};
 
   const handleLocationSelected = async (location) => {
     setSelectedLocation(location);

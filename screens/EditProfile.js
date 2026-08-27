@@ -6,18 +6,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
+import { subirImagen } from '../utils/subirImagen';
 
 export default function EditProfile() {
   const [username, setUsername] = useState('');
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState(null);
+  const [saving, setSaving] = useState(false);
   const navigation = useNavigation();
   const user = auth.currentUser;
 
@@ -69,13 +72,26 @@ export default function EditProfile() {
       return;
     }
 
+    setSaving(true);
     try {
+      let finalImageUrl = profileImage || '';
+
+      // Si se seleccionó una imagen local (file://, content://, etc.), la subimos a Cloudinary
+      if (
+        profileImage &&
+        (profileImage.startsWith('file://') ||
+          profileImage.startsWith('content://') ||
+          profileImage.startsWith('ph://'))
+      ) {
+        finalImageUrl = await subirImagen(profileImage);
+      }
+
       const userDocRef = doc(db, 'usuarios', user.uid);
 
       await updateDoc(userDocRef, {
         username,
         address,
-        profileImage: profileImage || '',
+        profileImage: finalImageUrl,
       });
 
       Alert.alert('Perfil actualizado', 'Los cambios se han guardado correctamente');
@@ -83,6 +99,8 @@ export default function EditProfile() {
     } catch (error) {
       console.error('Error al actualizar el perfil:', error);
       Alert.alert('Error', 'No se pudo guardar los cambios');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -99,7 +117,7 @@ export default function EditProfile() {
     <View style={styles.container}>
       <Text style={styles.title}>Editar Perfil</Text>
 
-      <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+      <TouchableOpacity onPress={pickImage} style={styles.imagePicker} disabled={saving}>
         {profileImage ? (
           <Image source={{ uri: profileImage }} style={styles.image} />
         ) : (
@@ -112,6 +130,7 @@ export default function EditProfile() {
         style={styles.input}
         value={username}
         onChangeText={setUsername}
+        editable={!saving}
       />
 
       <TextInput
@@ -119,14 +138,19 @@ export default function EditProfile() {
         style={styles.input}
         value={address}
         onChangeText={setAddress}
+        editable={!saving}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Guardar Cambios</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSave} disabled={saving}>
+        {saving ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Guardar Cambios</Text>
+        )}
       </TouchableOpacity>
 
       {/* Botón de Cerrar Sesión */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={saving}>
         <Text style={styles.logoutText}>Cerrar Sesión</Text>
       </TouchableOpacity>
     </View>

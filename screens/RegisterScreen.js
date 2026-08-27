@@ -4,6 +4,7 @@ import { registerWithEmail } from '../config/firebaseAuthService';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
 import { serverTimestamp } from 'firebase/firestore';
+import { ROLES } from '../constants/roles';
 
 
 const db = getFirestore(app);
@@ -67,7 +68,7 @@ export default function RegisterScreen({ navigation }) {
         await setDoc(doc(db, 'usuarios', user.uid), {
           username: fullName.trim(),
           profileImage: '',
-          rol: 'user',
+          rol: ROLES.USER,
           address: '',
           posts: [],
           creadoEn: serverTimestamp(),
