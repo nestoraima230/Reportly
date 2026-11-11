@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import { auth, db } from '../config/firebaseConfig';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
-import { subirImagen } from '../utils/subirImagen';
+import { uploadImageToCloudinary } from '../services/storageService';
+import { getUserProfile, updateUserProfile } from '../services/userService';
 
 export default function EditProfile() {
   const [username, setUsername] = useState('');
@@ -28,11 +28,8 @@ export default function EditProfile() {
     const cargarDatos = async () => {
       try {
         if (user) {
-          const userDocRef = doc(db, 'usuarios', user.uid);
-          const docSnap = await getDoc(userDocRef);
-
-          if (docSnap.exists()) {
-            const data = docSnap.data();
+          const data = await getUserProfile(user.uid);
+          if (data) {
             setUsername(data.username || '');
             setAddress(data.address || '');
             setProfileImage(data.profileImage || null);
@@ -83,12 +80,10 @@ export default function EditProfile() {
           profileImage.startsWith('content://') ||
           profileImage.startsWith('ph://'))
       ) {
-        finalImageUrl = await subirImagen(profileImage);
+        finalImageUrl = await uploadImageToCloudinary(profileImage);
       }
 
-      const userDocRef = doc(db, 'usuarios', user.uid);
-
-      await updateDoc(userDocRef, {
+      await updateUserProfile(user.uid, {
         username,
         address,
         profileImage: finalImageUrl,
@@ -189,8 +184,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonText: { color: '#fff', fontSize: 16 },
-  
-  // Estilos para el botón de cerrar sesión
   logoutButton: {
     marginTop: 20,
     padding: 12,

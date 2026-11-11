@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { registerWithEmail } from '../config/firebaseAuthService';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
 import { serverTimestamp } from 'firebase/firestore';
 import { ROLES } from '../constants/roles';
-
-
-const db = getFirestore(app);
+import { createUserProfile } from '../services/userService';
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -65,7 +61,7 @@ export default function RegisterScreen({ navigation }) {
         const userCredential = await registerWithEmail(email.trim(), password.trim(), fullName.trim());
         const user = userCredential.user;
 
-        await setDoc(doc(db, 'usuarios', user.uid), {
+        await createUserProfile(user.uid, {
           username: fullName.trim(),
           profileImage: '',
           rol: ROLES.USER,

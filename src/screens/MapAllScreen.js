@@ -2,34 +2,25 @@ import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import MapView from "react-native-map-clustering";
 import { Marker } from "react-native-maps";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../config/firebaseConfig";
+import { subscribeToReports } from "../services/reportsService";
 
 export default function MapAllScreen() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Suscripción en tiempo real
-    const unsubscribe = onSnapshot(
-      collection(db, "reportes"),
-      (snapshot) => {
-        const data = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter(
-            (d) =>
-              d.ubicacion?.latitude !== undefined &&
-              d.ubicacion?.longitude !== undefined
-          );
-
-        setReports(data);
+    const unsubscribe = subscribeToReports(
+      (data) => {
+        const filtered = data.filter(
+          (d) =>
+            d.ubicacion?.latitude !== undefined &&
+            d.ubicacion?.longitude !== undefined
+        );
+        setReports(filtered);
         setLoading(false);
       },
       (error) => {
-        console.log("Error cargando reportes:", error);
+        console.log("Error cargando reportes en mapa:", error);
         setLoading(false);
       }
     );
@@ -63,8 +54,8 @@ export default function MapAllScreen() {
             latitude: rep.ubicacion.latitude,
             longitude: rep.ubicacion.longitude,
           }}
-          title={rep.titulo}
-          description={rep.descripcion}
+          title={rep.title}
+          description={rep.description}
         />
       ))}
     </MapView>

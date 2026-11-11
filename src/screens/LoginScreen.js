@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { loginWithEmail } from '../config/firebaseAuthService';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { getUserProfile } from '../services/userService';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -10,9 +9,6 @@ export default function LoginScreen({ navigation }) {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState(null);
-
-
-  const db = getFirestore(app);
 
   const validateForm = () => {
     const newErrors = {};
@@ -41,19 +37,11 @@ export default function LoginScreen({ navigation }) {
       setLoading(true);
       try {
         const user = await loginWithEmail(email.trim(), password.trim());
+        const profile = await getUserProfile(user.uid);
 
-        const userDocRef = doc(db, 'usuarios', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        const rol = userDoc.data()?.rol;
-
-        
-
-        if (userDoc.exists()) {
-          const profile = userDoc.data();
+        if (profile) {
           console.log('Perfil cargado:', profile);
           setUserRole(profile.rol);
-          // navigation.navigate('Profile', { profile });
-          //Alert.alert('Inicio de sesión exitoso', `¡Bienvenido de nuevo, ${profile.username || 'usuario'}!`);
         } else {
           Alert.alert('Error', 'No se encontraron datos del perfil.');
         }

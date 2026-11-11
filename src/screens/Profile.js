@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { auth, db } from '../config/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { getUserProfile, createUserProfile } from '../services/userService';
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState(null);
@@ -16,19 +16,16 @@ export default function ProfileScreen() {
         const user = auth.currentUser;
 
         if (user) {
-          const docRef = doc(db, 'usuarios', user.uid);
-          const docSnap = await getDoc(docRef);
-
-          if (docSnap.exists()) {
-            setProfile(docSnap.data());
+          const profileData = await getUserProfile(user.uid);
+          if (profileData) {
+            setProfile(profileData);
           } else {
-            const defaultProfile = {
-              username: user.email.split('@')[0],
+            const defaultProfile = await createUserProfile(user.uid, {
+              username: user.email ? user.email.split('@')[0] : 'Usuario',
               address: '',
               profileImage: '',
               posts: [],
-            };
-            await setDoc(docRef, defaultProfile);
+            });
             setProfile(defaultProfile);
           }
         } else {

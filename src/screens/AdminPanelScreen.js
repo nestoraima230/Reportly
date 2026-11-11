@@ -1,34 +1,29 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { collection, query, where, onSnapshot, updateDoc, doc, getFirestore, serverTimestamp } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { subscribeToPendingReports, updateReportStatus } from '../services/reportsService';
 
-const db = getFirestore(app);
-
-export default function AdminPanel() {
+export default function AdminPanelScreen() {
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'reportes'), where('estado', '==', 'pendiente'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const datos = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setReportes(datos);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeToPendingReports(
+      (datos) => {
+        setReportes(datos);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error cargando reportes pendientes:', error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
 
   const cambiarEstado = async (id, nuevoEstado) => {
     try {
-      await updateDoc(doc(db, 'reportes', id), {
-        estado: nuevoEstado,
-        actualizadoEn: serverTimestamp()
-      });
+      await updateReportStatus(id, nuevoEstado);
       Alert.alert('Éxito', `Reporte marcado como ${nuevoEstado}`);
     } catch (error) {
       Alert.alert('Error', 'No se pudo cambiar el estado.');

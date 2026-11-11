@@ -18,9 +18,9 @@ const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          'Permission Denied',
-          'Location permission is required to use this feature.',
-          [{ text: 'Okay' }]
+          'Permiso Denegado',
+          'Se requieren permisos de ubicación para utilizar esta función.',
+          [{ text: 'Entendido' }]
         );
         setIsFetching(false);
         return;
@@ -35,8 +35,8 @@ const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
       } catch (error) {
         Alert.alert(
           'Error',
-          'Could not fetch location. Using default location.',
-          [{ text: 'Okay' }]
+          'No se pudo obtener la ubicación actual. Usando ubicación por defecto.',
+          [{ text: 'Entendido' }]
         );
       } finally {
         setIsFetching(false);
@@ -52,7 +52,6 @@ const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
     }
   }, [selectedLocation]);
 
-
   const handleMapPress = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     const newLocation = {
@@ -66,7 +65,7 @@ const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
   if (isFetching) {
     return (
       <View style={[styles.loader, style]}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#2c4d4e" />
       </View>
     );
   }
@@ -82,11 +81,11 @@ const UbicationSelector = ({ onLocationSelected, selectedLocation, style }) => {
         }}
         onPress={handleMapPress}
       >
-        {mapLocation  && (
-          <Marker title="Selected Location" coordinate={mapLocation} />
+        {mapLocation && (
+          <Marker title="Ubicación seleccionada" coordinate={mapLocation} />
         )}
         {selectedLocation && !mapLocation && (
-          <Marker title="Current Location" coordinate={selectedLocation} />
+          <Marker title="Ubicación actual" coordinate={selectedLocation} />
         )}
       </MapView>
     </View>

@@ -5,15 +5,12 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import * as ImageManipulator from "expo-image-manipulator";
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { app, db } from '../config/firebaseConfig';
-import UbicationSelector from '../utils/ubicationSelector';
+import { app } from '../config/firebaseConfig';
+import UbicationSelector from '../components/UbicationSelector';
 import { useFocusEffect } from '@react-navigation/native';
-import { subirImagen } from '../utils/subirImagen';
-
-
+import { uploadImageToCloudinary } from '../services/storageService';
+import { createReport } from '../services/reportsService';
 
 // Obtener colonia desde Nominatim (OpenStreetMap)
 const obtenerColonia = async (lat, lon) => {
@@ -51,7 +48,6 @@ export default function CreateReport({ navigation }) {
   const [etiquetas, setEtiquetas] = useState('');
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
-
 
   const limpiarFormulario = () => {
     setTitulo('');
@@ -142,7 +138,7 @@ export default function CreateReport({ navigation }) {
 
     try {
       if (imagen) {
-        imagenURL = await subirImagen(imagen);
+        imagenURL = await uploadImageToCloudinary(imagen);
       }
 
       const colonia = await obtenerColonia(
@@ -150,18 +146,17 @@ export default function CreateReport({ navigation }) {
         selectedLocation.longitude
       );
 
-      await addDoc(collection(db, 'reportes'), {
+      await createReport({
         titulo,
         descripcion,
         ubicacion: selectedLocation,
         direccion: ubicacionTexto,
         colonia,
-        etiquetas: etiquetas.split(',').map(e => e.trim()),
+        etiquetas: etiquetas ? etiquetas.split(',').map(e => e.trim()) : [],
         imagenURL,
         estado: "pendiente",
-        creadoEn: serverTimestamp(), 
-        userId: auth.currentUser.uid,
-        nombreUsuario: auth.currentUser.displayName || 'Sin nombre',
+        userId: auth.currentUser?.uid || '',
+        nombreUsuario: auth.currentUser?.displayName || 'Sin nombre',
       });
 
       Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);

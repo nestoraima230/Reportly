@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ReportDetail from '../screens/ReportDetail'; 
-import AdminPanel from "../utils/adminPanel";
+import AdminPanelScreen from "../screens/AdminPanelScreen";
 import MapScreen from "../screens/MapScreen";
 import { AuthContext } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
@@ -10,8 +10,6 @@ import { ROLES } from "../constants/roles";
 const Stack = createNativeStackNavigator();
 
 export default function AppStack() {
-
-  // <-- Aquí obtienes user y userRole correctamente
   const { user, userRole } = useContext(AuthContext);
 
   return (
@@ -36,7 +34,7 @@ export default function AppStack() {
       />
 
       {userRole === ROLES.ADMIN && (
-        <Stack.Screen name="AdminPanel" component={AdminPanel} />
+        <Stack.Screen name="AdminPanel" component={AdminPanelScreen} />
       )}
     </Stack.Navigator>
   );

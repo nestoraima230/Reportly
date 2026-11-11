@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import AuthStack from './navigation/AuthStack';
-import AppStack from './navigation/AppStack';
-import { AuthProvider, AuthContext } from './context/AuthContext';
+import AuthStack from './src/navigation/AuthStack';
+import AppStack from './src/navigation/AppStack';
+import { AuthProvider, AuthContext } from './src/context/AuthContext';
 
 function AppNavigator() {
   const { user, loading } = useContext(AuthContext);

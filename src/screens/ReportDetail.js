@@ -1,12 +1,9 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Button, Alert, TouchableOpacity } from 'react-native';
-import { doc, updateDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { ROLES } from '../constants/roles';
-
-const db = getFirestore(app);
+import { updateReportStatus } from '../services/reportsService';
 
 export default function ReportDetail({ route }) {
   const { userRole } = useContext(AuthContext);
@@ -24,13 +21,9 @@ export default function ReportDetail({ route }) {
     longitude: null
   };
 
-  const actualizarEstado = async (nuevoEstado) => {
+  const cambiarEstado = async (nuevoEstado) => {
     try {
-      const reporteRef = doc(db, 'reportes', report.id);
-      await updateDoc(reporteRef, {
-        estado: nuevoEstado,
-        actualizadoEn: serverTimestamp()
-      });
+      await updateReportStatus(report.id, nuevoEstado);
       Alert.alert('Éxito', `El reporte fue marcado como ${nuevoEstado}`);
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar el estado.');
@@ -98,8 +91,8 @@ export default function ReportDetail({ route }) {
 
       {userRole === ROLES.ADMIN && report.id && (
         <View style={{ marginTop: 20 }}>
-          <Button title="Marcar como Resuelto" onPress={() => actualizarEstado('resuelto')} />
-          <Button title="Marcar como No Resuelto" onPress={() => actualizarEstado('no_resuelto')} />
+          <Button title="Marcar como Resuelto" onPress={() => cambiarEstado('resuelto')} />
+          <Button title="Marcar como No Resuelto" onPress={() => cambiarEstado('no_resuelto')} />
         </View>
       )}
 

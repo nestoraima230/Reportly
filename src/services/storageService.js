@@ -1,6 +1,11 @@
 import * as ImageManipulator from 'expo-image-manipulator';
 
-export const subirImagen = async (uri) => {
+/**
+ * Subes y comprimes una imagen local a Cloudinary
+ * @param {string} uri - Ruta local de la imagen (file://, content://, ph://)
+ * @returns {Promise<string>} - URL segura HTTPS retornada por Cloudinary
+ */
+export const uploadImageToCloudinary = async (uri) => {
   try {
     // 1. Comprimir imagen primero (HD pero liviana)
     const compressed = await ImageManipulator.manipulateAsync(
@@ -36,7 +41,7 @@ export const subirImagen = async (uri) => {
       throw new Error(result.error?.message || 'Error al subir imagen a Cloudinary');
     }
   } catch (error) {
-    console.error('Error en subirImagen (Cloudinary):', error);
+    console.error('Error en uploadImageToCloudinary:', error);
     throw error;
   }
 };

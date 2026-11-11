@@ -1,9 +1,8 @@
-// HomeScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 
-export default function HomeScreen({ user, navigation }) {
+export default function HomeScreen({ user }) {
   const auth = getAuth();
 
   const handleLogout = () => {

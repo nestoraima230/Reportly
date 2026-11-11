@@ -1,11 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebaseConfig'; // o desde firebaseConfig.js si ya lo tienes ahí
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { auth } from '../config/firebaseConfig';
 import { ROLES } from '../constants/roles';
-
-const db = getFirestore(app);
+import { getUserProfile } from '../services/userService';
 
 export const AuthContext = createContext();
 
@@ -19,11 +16,10 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
 
-        // Obtener el rol desde Firestore
         try {
-          const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid));
-          if (userDoc.exists()) {
-            const rawRole = userDoc.data()?.rol;
+          const profileData = await getUserProfile(firebaseUser.uid);
+          if (profileData) {
+            const rawRole = profileData.rol;
             const normalizedRole = rawRole === 'usuario' ? ROLES.USER : (rawRole || ROLES.USER);
             setUserRole(normalizedRole);
           } else {
