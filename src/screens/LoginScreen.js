@@ -1,30 +1,43 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { loginWithEmail } from '../config/firebaseAuthService';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { loginWithEmail, resetPassword } from '../config/firebaseAuthService';
 import { getUserProfile } from '../services/userService';
+import { getAuthErrorMessage } from '../utils/authErrors';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
 
     if (!trimmedEmail) {
       newErrors.email = 'El correo electrónico es obligatorio';
     } else if (!emailRegex.test(trimmedEmail)) {
-      newErrors.email = 'Correo electrónico inválido';
+      newErrors.email = 'Ingresa un correo electrónico válido (ej. usuario@correo.com)';
     }
 
-    if (!trimmedPassword) {
+    if (!password) {
       newErrors.password = 'La contraseña es obligatoria';
-    } else if (trimmedPassword.length < 6) {
+    } else if (password.length < 6) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
@@ -35,94 +48,257 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     if (validateForm()) {
       setLoading(true);
+      const normalizedEmail = email.trim().toLowerCase();
       try {
-        const user = await loginWithEmail(email.trim(), password.trim());
+        const user = await loginWithEmail(normalizedEmail, password);
         const profile = await getUserProfile(user.uid);
 
-        if (profile) {
-          console.log('Perfil cargado:', profile);
-          setUserRole(profile.rol);
-        } else {
-          Alert.alert('Error', 'No se encontraron datos del perfil.');
+        if (!profile) {
+          console.warn('No se encontró perfil para el usuario logueado.');
         }
       } catch (error) {
-        Alert.alert("Error al iniciar sesión", error.message);
+        const friendlyMessage = getAuthErrorMessage(error);
+        Alert.alert('Error al iniciar sesión', friendlyMessage);
       } finally {
         setLoading(false);
       }
     }
   };
 
+  const handleForgotPassword = async () => {
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: 'Ingresa tu correo para enviarte el enlace de recuperación',
+      }));
+      Alert.alert(
+        'Recuperar contraseña',
+        'Por favor ingresa un correo electrónico válido en el campo correspondiente para enviarte las instrucciones.'
+      );
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      await resetPassword(trimmedEmail);
+      Alert.alert(
+        'Correo enviado',
+        `Hemos enviado un enlace para restablecer tu contraseña a ${trimmedEmail}. Revisa también tu carpeta de spam.`
+      );
+    } catch (error) {
+      const friendlyMessage = getAuthErrorMessage(error);
+      Alert.alert('No se pudo enviar el correo', friendlyMessage);
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Hola de nuevo!</Text>
-      <Text style={styles.subtitle}>Inicia sesión</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>¡Hola de nuevo!</Text>
+          <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
 
-      <TextInput
-        placeholder="Correo electrónico"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          {/* Campo Correo Electrónico */}
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            placeholder="ejemplo@correo.com"
+            placeholderTextColor="#999"
+            style={[styles.input, errors.email && styles.inputError]}
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (errors.email) {
+                setErrors((prev) => ({ ...prev, email: null }));
+              }
+            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-      <TextInput
-        placeholder="Contraseña"
-        style={styles.input}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+          {/* Campo Contraseña */}
+          <Text style={styles.label}>Contraseña</Text>
+          <View
+            style={[
+              styles.passwordContainer,
+              errors.password && styles.inputError,
+            ]}
+          >
+            <TextInput
+              placeholder="Tu contraseña"
+              placeholderTextColor="#999"
+              style={styles.passwordInput}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) {
+                  setErrors((prev) => ({ ...prev, password: null }));
+                }
+              }}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={22}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-      <TouchableOpacity>
-        <Text style={styles.forgotText}>¿Olvidaste la contraseña?</Text>
-      </TouchableOpacity>
+          {/* Botón ¿Olvidaste la contraseña? */}
+          <TouchableOpacity
+            onPress={handleForgotPassword}
+            disabled={resettingPassword}
+            style={styles.forgotButton}
+          >
+            <Text style={styles.forgotText}>
+              {resettingPassword ? 'Enviando enlace...' : '¿Olvidaste la contraseña?'}
+            </Text>
+          </TouchableOpacity>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#2c4d4e" style={{ marginTop: 10 }} />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Iniciar sesión</Text>
-        </TouchableOpacity>
-      )}
+          {/* Botón Iniciar Sesión */}
+          {loading ? (
+            <ActivityIndicator size="large" color="#2c4d4e" style={{ marginTop: 10 }} />
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          )}
 
-      <Text style={styles.switchText}>
-        ¿Eres nuevo?{' '}
-        <Text style={styles.linkText} onPress={() => navigation.navigate('Register')}>
-          Regístrate aquí
-        </Text>
-      </Text>
-    </View>
+          {/* Navegación a Registro */}
+          <Text style={styles.switchText}>
+            ¿Eres nuevo?{' '}
+            <Text
+              style={styles.linkText}
+              onPress={() => navigation.navigate('Register')}
+            >
+              Regístrate aquí
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: 'center' },
-  title: { fontSize: 24, marginBottom: 8, textAlign: 'center' },
-  subtitle: { fontSize: 16, marginBottom: 20, textAlign: 'center' },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  container: {
+    padding: 24,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    textAlign: 'center',
+    color: '#2c4d4e',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 24,
+    textAlign: 'center',
+    color: '#666',
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+    marginTop: 8,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    marginVertical: 8,
+    padding: 12,
     borderRadius: 8,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#000',
+  },
+  eyeIcon: {
+    paddingLeft: 8,
+  },
+  inputError: {
+    borderColor: '#d32f2f',
+    backgroundColor: '#fff8f8',
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontSize: 13,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  forgotButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+    marginBottom: 20,
   },
   forgotText: {
-    textAlign: 'right',
     color: '#2c4d4e',
-    marginBottom: 20,
+    fontWeight: '500',
+    fontSize: 14,
   },
   button: {
     backgroundColor: '#2c4d4e',
-    padding: 12,
+    padding: 14,
     borderRadius: 8,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  buttonText: { color: '#fff', fontSize: 16 },
-  switchText: { marginTop: 20, textAlign: 'center' },
-  linkText: { color: '#2c4d4e', fontWeight: 'bold' },
-  errorText: { color: 'red', marginBottom: 6, marginLeft: 4 },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  switchText: {
+    marginTop: 24,
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#555',
+  },
+  linkText: {
+    color: '#2c4d4e',
+    fontWeight: 'bold',
+  },
 });
