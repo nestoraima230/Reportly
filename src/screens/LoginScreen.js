@@ -15,8 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { loginWithEmail, resetPassword } from '../config/firebaseAuthService';
 import { getUserProfile } from '../services/userService';
 import { getAuthErrorMessage } from '../utils/authErrors';
+import { useTheme } from '../constants/theme';
 
 export default function LoginScreen({ navigation }) {
+  const theme = useTheme();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -99,22 +102,26 @@ export default function LoginScreen({ navigation }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: theme.background }}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.container}>
-          <Text style={styles.title}>¡Hola de nuevo!</Text>
-          <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
+          <Text style={[styles.title, { color: theme.text }]}>¡Hola de nuevo!</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Inicia sesión en tu cuenta</Text>
 
           {/* Campo Correo Electrónico */}
-          <Text style={styles.label}>Correo electrónico</Text>
+          <Text style={[styles.label, { color: theme.label }]}>Correo electrónico</Text>
           <TextInput
             placeholder="ejemplo@correo.com"
-            placeholderTextColor="#999"
-            style={[styles.input, errors.email && styles.inputError]}
+            placeholderTextColor={theme.textMuted}
+            style={[
+              styles.input,
+              { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.inputText },
+              errors.email && styles.inputError,
+            ]}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -129,17 +136,18 @@ export default function LoginScreen({ navigation }) {
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
           {/* Campo Contraseña */}
-          <Text style={styles.label}>Contraseña</Text>
+          <Text style={[styles.label, { color: theme.label }]}>Contraseña</Text>
           <View
             style={[
               styles.passwordContainer,
+              { backgroundColor: theme.input, borderColor: theme.inputBorder },
               errors.password && styles.inputError,
             ]}
           >
             <TextInput
               placeholder="Tu contraseña"
-              placeholderTextColor="#999"
-              style={styles.passwordInput}
+              placeholderTextColor={theme.textMuted}
+              style={[styles.passwordInput, { color: theme.inputText }]}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={(text) => {
@@ -159,7 +167,7 @@ export default function LoginScreen({ navigation }) {
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={22}
-                color="#666"
+                color={theme.textSecondary}
               />
             </TouchableOpacity>
           </View>
@@ -171,25 +179,25 @@ export default function LoginScreen({ navigation }) {
             disabled={resettingPassword}
             style={styles.forgotButton}
           >
-            <Text style={styles.forgotText}>
+            <Text style={[styles.forgotText, { color: theme.link }]}>
               {resettingPassword ? 'Enviando enlace...' : '¿Olvidaste la contraseña?'}
             </Text>
           </TouchableOpacity>
 
           {/* Botón Iniciar Sesión */}
           {loading ? (
-            <ActivityIndicator size="large" color="#2c4d4e" style={{ marginTop: 10 }} />
+            <ActivityIndicator size="large" color={theme.activityIndicator} style={{ marginTop: 10 }} />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Iniciar sesión</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.button }]} onPress={handleLogin}>
+              <Text style={[styles.buttonText, { color: theme.buttonText }]}>Iniciar sesión</Text>
             </TouchableOpacity>
           )}
 
           {/* Navegación a Registro */}
-          <Text style={styles.switchText}>
+          <Text style={[styles.switchText, { color: theme.switchText }]}>
             ¿Eres nuevo?{' '}
             <Text
-              style={styles.linkText}
+              style={[styles.linkText, { color: theme.link }]}
               onPress={() => navigation.navigate('Register')}
             >
               Regístrate aquí
@@ -214,50 +222,41 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 6,
     textAlign: 'center',
-    color: '#2c4d4e',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 24,
     textAlign: 'center',
-    color: '#666',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
     marginTop: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 8,
-    backgroundColor: '#fff',
     paddingHorizontal: 12,
   },
   passwordInput: {
     flex: 1,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#000',
   },
   eyeIcon: {
     paddingLeft: 8,
   },
   inputError: {
     borderColor: '#d32f2f',
-    backgroundColor: '#fff8f8',
   },
   errorText: {
     color: '#d32f2f',
@@ -271,12 +270,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   forgotText: {
-    color: '#2c4d4e',
     fontWeight: '500',
     fontSize: 14,
   },
   button: {
-    backgroundColor: '#2c4d4e',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -287,7 +284,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -295,10 +291,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
     textAlign: 'center',
     fontSize: 15,
-    color: '#555',
   },
   linkText: {
-    color: '#2c4d4e',
     fontWeight: 'bold',
   },
 });
