@@ -12,32 +12,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { uploadImageToCloudinary } from '../services/storageService';
 import { createReport } from '../services/reportsService';
 
-// Obtener colonia desde Nominatim (OpenStreetMap)
-const obtenerColonia = async (lat, lon) => {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
-    );
-    const data = await response.json();
-    const address = data.address;
-
-    return (
-      address.suburb ||
-      address.neighbourhood ||
-      address.village ||
-      address.hamlet ||
-      address.residential ||
-      address.city_district ||  
-      address.road ||           
-      address.city ||
-      "Desconocido"
-    );
-  } catch (error) {
-    console.error('Error obteniendo colonia:', error);
-    return 'Desconocido';
-  }
-};
-
 export default function CreateReport({ navigation }) {
   const auth = getAuth(app);
 
@@ -141,17 +115,11 @@ export default function CreateReport({ navigation }) {
         imagenURL = await uploadImageToCloudinary(imagen);
       }
 
-      const colonia = await obtenerColonia(
-        selectedLocation.latitude,
-        selectedLocation.longitude
-      );
-
       await createReport({
         titulo,
         descripcion,
         ubicacion: selectedLocation,
         direccion: ubicacionTexto,
-        colonia,
         etiquetas: etiquetas ? etiquetas.split(',').map(e => e.trim()) : [],
         imagenURL,
         estado: "pendiente",

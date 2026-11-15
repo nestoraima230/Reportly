@@ -18,11 +18,17 @@ export const registerWithEmail = async (email, password, name) => {
       await updateProfile(user, { displayName: name });
     }
 
+    try {
+      await sendEmailVerification(user);
+    } catch (emailErr) {
+      if (__DEV__) console.log('[auth/verify-email]', emailErr.code);
+    }
+
     console.log(`✅ Registro exitoso: ${user.displayName || name} (${user.email})`);
 
     return userCredential;  
   } catch (error) {
-    console.error("Error al registrar usuario:", error);
+    if (__DEV__) console.log('[auth/register]', error.code);
     throw error;  
   }
 };
@@ -36,7 +42,7 @@ export const loginWithEmail = async (email, password) => {
 
     return user;
   } catch (error) {
-    console.error("Error al iniciar sesión:", error);
+      if (__DEV__) console.log('[auth/login]', error.code);
     throw error;
   }
 };
