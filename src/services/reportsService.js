@@ -72,6 +72,58 @@ export const subscribeToPendingReports = (onUpdate, onError) => {
 };
 
 /**
+ * Suscripción en tiempo real a los reportes creados por un usuario específico
+ * @param {string} userId - UID del usuario creador
+ * @param {Function} onUpdate - Callback al recibir datos
+ * @param {Function} onError - Callback ante errores
+ * @returns {Function} Unsubscribe listener
+ */
+export const subscribeToUserReports = (userId, onUpdate, onError) => {
+  if (!userId) {
+    if (onUpdate) onUpdate([]);
+    return () => {};
+  }
+
+  const q = query(collection(db, 'reportes'), where('userId', '==', userId));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const data = snapshot.docs.map((docSnap) => {
+        const d = docSnap.data();
+        return {
+          id: docSnap.id,
+          title: d.titulo,
+          description: d.descripcion,
+          image: d.imagenURL,
+          comments: d.comentarios || [],
+          user: d.nombreUsuario || 'Anónimo',
+          direccion: d.direccion || 'Ubicación no disponible',
+          etiquetas: d.etiquetas || [],
+          estado: d.estado,
+          creadoEn: d.creadoEn?.toDate() || null,
+          ubicacion: d.ubicacion,
+          colonia: d.colonia,
+          userId: d.userId,
+        };
+      });
+
+      // Orden cronológico inverso (los más recientes primero)
+      data.sort((a, b) => {
+        const dateA = a.creadoEn ? a.creadoEn.getTime() : 0;
+        const dateB = b.creadoEn ? b.creadoEn.getTime() : 0;
+        return dateB - dateA;
+      });
+
+      onUpdate(data);
+    },
+    (error) => {
+      if (onError) onError(error);
+      else console.error('Error al suscribirse a reportes del usuario:', error);
+    }
+  );
+};
+
+/**
  * Crea un nuevo reporte en Firestore
  * @param {Object} reportData - Datos del reporte a guardar
  */

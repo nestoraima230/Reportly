@@ -12,7 +12,7 @@ export default function MainTabs({ user }) {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name="Feed"
+        name="Publicaciones"
         component={Feed}
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -32,7 +32,7 @@ export default function MainTabs({ user }) {
       />
 
       <Tab.Screen
-        name="Create"
+        name="Crear"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" size={size} color={color} />
