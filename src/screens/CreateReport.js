@@ -11,9 +11,11 @@ import UbicationSelector from '../components/UbicationSelector';
 import { useFocusEffect } from '@react-navigation/native';
 import { uploadImageToCloudinary } from '../services/storageService';
 import { createReport } from '../services/reportsService';
+import { useTheme } from '../constants/theme';
 
 export default function CreateReport({ navigation }) {
   const auth = getAuth(app);
+  const theme = useTheme();
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -138,45 +140,56 @@ export default function CreateReport({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Crear nuevo reporte</Text>
+    <ScrollView
+      contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
+      style={{ backgroundColor: theme.background }}
+    >
+      <Text style={[styles.title, { color: theme.text }]}>Crear nuevo reporte</Text>
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, {
+          backgroundColor: theme.input,
+          borderColor: theme.inputBorder,
+          color: theme.inputText,
+        }]}
         placeholder="Título del reporte"
+        placeholderTextColor={theme.textMuted}
         value={titulo}
         onChangeText={setTitulo}
       />
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.imageBtn} onPress={seleccionarImagen}>
-          <Text style={styles.imageBtnText}>📁 Galería</Text>
+        <TouchableOpacity style={[styles.imageBtn, { backgroundColor: theme.surface }]} onPress={seleccionarImagen}>
+          <Text style={[styles.imageBtnText, { color: theme.text }]}>📁 Galería</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.imageBtn} onPress={tomarFoto}>
-          <Text style={styles.imageBtnText}>📷 Cámara</Text>
+        <TouchableOpacity style={[styles.imageBtn, { backgroundColor: theme.surface }]} onPress={tomarFoto}>
+          <Text style={[styles.imageBtnText, { color: theme.text }]}>📷 Cámara</Text>
         </TouchableOpacity>
       </View>
 
       {imagen && <Image source={{ uri: imagen }} style={styles.image} />}
 
       <TextInput
-        style={[styles.input, { height: 100 }]}
+        style={[styles.input, { height: 100, backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.inputText }]}
         placeholder="Descripción"
+        placeholderTextColor={theme.textMuted}
         multiline
         value={descripcion}
         onChangeText={setDescripcion}
       />
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.inputText }]}
         placeholder="Ubicación seleccionada"
+        placeholderTextColor={theme.textMuted}
         value={ubicacionTexto}
         editable={false}
       />
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.input, borderColor: theme.inputBorder, color: theme.inputText }]}
         placeholder="Etiquetas (separadas por comas)"
+        placeholderTextColor={theme.textMuted}
         value={etiquetas}
         onChangeText={setEtiquetas}
       />
@@ -187,7 +200,11 @@ export default function CreateReport({ navigation }) {
         style={{ height: 300, marginVertical: 10 }}
       />
 
-      <TouchableOpacity style={styles.button} onPress={publicarReporte} disabled={loading}>
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: theme.button }]}
+        onPress={publicarReporte}
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
@@ -202,20 +219,22 @@ const styles = StyleSheet.create({
   container: { padding: 20 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
   input: {
-    borderWidth: 1, borderColor: '#ccc', padding: 10,
-    borderRadius: 8, marginBottom: 12
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
   },
   buttonRow: {
     flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12
   },
   imageBtn: {
-    flex: 1, backgroundColor: '#ddd', padding: 10,
+    flex: 1, padding: 10,
     borderRadius: 8, marginHorizontal: 5, alignItems: 'center'
   },
-  imageBtnText: { color: '#333' },
+  imageBtnText: { fontWeight: '500' },
   image: { width: '100%', height: 200, borderRadius: 8, marginBottom: 12 },
   button: {
-    backgroundColor: '#2c4d4e', padding: 15,
+    padding: 15,
     borderRadius: 8, alignItems: 'center', marginTop: 10
   },
   buttonText: { color: '#fff', fontSize: 16 },

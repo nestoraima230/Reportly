@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Share } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { subscribeToReports } from '../services/reportsService';
+import { useTheme } from '../constants/theme';
 
 export default function Feed() {
   const [reportes, setReportes] = useState([]);
   const navigation = useNavigation();
+  const theme = useTheme();
 
   useEffect(() => {
     const unsubscribe = subscribeToReports(
@@ -44,13 +46,16 @@ export default function Feed() {
       : item.direccion;
 
     return (
-      <TouchableOpacity style={styles.post} onPress={() => goToDetail(item)}>
+      <TouchableOpacity
+        style={[styles.post, { backgroundColor: theme.surface }]}
+        onPress={() => goToDetail(item)}
+      >
         {/* Usuario */}
-        <Text style={styles.user}>👤 {item.user}</Text>
+        <Text style={[styles.user, { color: theme.textSecondary }]}>👤 {item.user}</Text>
 
         {/* Fecha de publicación */}
         {item.creadoEn && (
-          <Text style={styles.fecha}>
+          <Text style={[styles.fecha, { color: theme.textMuted }]}>
             🕒 {item.creadoEn.toLocaleString('es-MX', {
               dateStyle: 'short',
               timeStyle: 'short',
@@ -65,14 +70,14 @@ export default function Feed() {
 
         {/* Título */}
         <TouchableOpacity onPress={() => navigation.navigate('ReportDetail', { reporte: item })}>
-          <Text style={styles.title}>{item.title}</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
         </TouchableOpacity>
 
         {/* Descripción */}
-        <Text style={styles.description}>{item.description}</Text>
+        <Text style={[styles.description, { color: theme.text }]}>{item.description}</Text>
 
         {/* Dirección */}
-        <Text style={styles.direccion}>📍 {direccionRecortada}</Text>
+        <Text style={[styles.direccion, { color: theme.textSecondary }]}>📍 {direccionRecortada}</Text>
 
         {/* Etiquetas */}
         {item.etiquetas && item.etiquetas.length > 0 && (
@@ -86,11 +91,11 @@ export default function Feed() {
         {/* Acciones */}
         <View style={styles.actions}>
           <TouchableOpacity onPress={() => handleShare(item.title, item.description)}>
-            <Text style={styles.actionText}>📤 Compartir</Text>
+            <Text style={[styles.actionText, { color: theme.link }]}>📤 Compartir</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => handleReport(item.title)}>
-            <Text style={styles.actionText}>🚩 Reportar</Text>
+            <Text style={[styles.actionText, { color: theme.link }]}>🚩 Reportar</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -98,26 +103,25 @@ export default function Feed() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
         data={reportes}
         keyExtractor={(item) => item.id}
         renderItem={renderPost}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>No hay reportes aún</Text>}
+        ListEmptyComponent={<Text style={[styles.empty, { color: theme.textMuted }]}>No hay reportes aún</Text>}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1 },
   list: { padding: 10 },
   post: {
     marginBottom: 20,
     padding: 15,
     borderRadius: 10,
-    backgroundColor: '#f5f5f5',
     elevation: 3,
   },
   image: { width: '100%', height: 200, borderRadius: 10 },
@@ -125,13 +129,11 @@ const styles = StyleSheet.create({
   description: { fontSize: 16, marginVertical: 5 },
   direccion: {
     fontSize: 14,
-    color: '#666',
     marginTop: 5,
     fontStyle: 'italic',
   },
   user: {
     fontSize: 14,
-    color: '#444',
     marginBottom: 5,
     fontStyle: 'italic',
   },
@@ -142,7 +144,6 @@ const styles = StyleSheet.create({
   },
   fecha: {
     fontSize: 12,
-    color: '#777',
     marginBottom: 5,
     fontStyle: 'italic',
   },
@@ -170,6 +171,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     fontSize: 16,
-    color: '#999',
   },
 });

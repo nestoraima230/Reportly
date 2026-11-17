@@ -17,6 +17,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { getUserProfile, createUserProfile } from '../services/userService';
 import { subscribeToUserReports } from '../services/reportsService';
+import { useTheme } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 const ITEM_MARGIN = 6;
@@ -29,6 +30,7 @@ export default function ProfileScreen() {
   const [loadingReports, setLoadingReports] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
+  const theme = useTheme();
 
   const user = auth.currentUser;
 
@@ -165,13 +167,13 @@ export default function ProfileScreen() {
       <View style={styles.headerContainer}>
         {/* Barra superior con Ajustes */}
         <View style={styles.topBar}>
-          <Text style={styles.screenTitle}>Mi Perfil</Text>
+          <Text style={[styles.screenTitle, { color: theme.text }]}>Mi Perfil</Text>
           <TouchableOpacity
             style={styles.settingsBtn}
             onPress={() => navigation.navigate('EditProfile')}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="settings-outline" size={24} color="#333" />
+            <Ionicons name="settings-outline" size={24} color={theme.text} />
           </TouchableOpacity>
         </View>
 
@@ -180,33 +182,33 @@ export default function ProfileScreen() {
           {profile?.profileImage ? (
             <Image source={{ uri: profile.profileImage }} style={styles.avatar} />
           ) : (
-            <View style={[styles.avatar, styles.placeholderAvatar]}>
-              <Ionicons name="person-circle-outline" size={82} color="#bbb" />
+            <View style={[styles.avatar, styles.placeholderAvatar, { backgroundColor: theme.surface, borderColor: theme.inputBorder }]}>
+              <Ionicons name="person-circle-outline" size={82} color={theme.textMuted} />
             </View>
           )}
 
           <View style={styles.statsContainer}>
             <View style={styles.statColumn}>
-              <Text style={styles.statNumber}>{totalReports}</Text>
-              <Text style={styles.statLabel}>Reportes</Text>
+              <Text style={[styles.statNumber, { color: theme.text }]}>{totalReports}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Reportes</Text>
             </View>
             <View style={styles.statColumn}>
               <Text style={[styles.statNumber, { color: '#2e7d32' }]}>{resolvedReports}</Text>
-              <Text style={styles.statLabel}>Resueltos</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Resueltos</Text>
             </View>
             <View style={styles.statColumn}>
               <Text style={[styles.statNumber, { color: '#e65100' }]}>{pendingReports}</Text>
-              <Text style={styles.statLabel}>Pendientes</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pendientes</Text>
             </View>
           </View>
         </View>
 
         {/* Información del Usuario (Nombre y Ubicación) */}
         <View style={styles.bioSection}>
-          <Text style={styles.username}>{profile?.username || 'Usuario'}</Text>
+          <Text style={[styles.username, { color: theme.text }]}>{profile?.username || 'Usuario'}</Text>
           <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={15} color="#555" />
-            <Text style={styles.address}>
+            <Ionicons name="location-outline" size={15} color={theme.textSecondary} />
+            <Text style={[styles.address, { color: theme.textSecondary }]}>
               {profile?.address ? profile.address : 'Ubicación no configurada'}
             </Text>
           </View>
@@ -214,17 +216,17 @@ export default function ProfileScreen() {
 
         {/* Botón Ancho Estilo Instagram "Editar Perfil" */}
         <TouchableOpacity
-          style={styles.editProfileButton}
+          style={[styles.editProfileButton, { backgroundColor: theme.surface, borderColor: theme.inputBorder }]}
           onPress={() => navigation.navigate('EditProfile')}
         >
-          <Text style={styles.editProfileButtonText}>Editar perfil</Text>
+          <Text style={[styles.editProfileButtonText, { color: theme.text }]}>Editar perfil</Text>
         </TouchableOpacity>
 
         {/* Divisor / Pestaña de Publicaciones */}
-        <View style={styles.tabSection}>
+        <View style={[styles.tabSection, { borderTopColor: theme.inputBorder, borderBottomColor: theme.inputBorder }]}>
           <View style={styles.tabActive}>
-            <Ionicons name="grid-outline" size={20} color="#2c4d4e" />
-            <Text style={styles.tabTextActive}>Mis Publicaciones ({totalReports})</Text>
+            <Ionicons name="grid-outline" size={20} color={theme.button} />
+            <Text style={[styles.tabTextActive, { color: theme.button }]}>Mis Publicaciones ({totalReports})</Text>
           </View>
         </View>
       </View>
@@ -235,21 +237,21 @@ export default function ProfileScreen() {
     if (loadingReports) {
       return (
         <View style={styles.emptyContainer}>
-          <ActivityIndicator size="small" color="#2c4d4e" />
-          <Text style={styles.emptySubtext}>Cargando reportes...</Text>
+          <ActivityIndicator size="small" color={theme.activityIndicator} />
+          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>Cargando reportes...</Text>
         </View>
       );
     }
 
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="document-text-outline" size={60} color="#bbb" />
-        <Text style={styles.emptyTitle}>Aún no tienes reportes</Text>
-        <Text style={styles.emptySubtext}>
+        <Ionicons name="document-text-outline" size={60} color={theme.textMuted} />
+        <Text style={[styles.emptyTitle, { color: theme.text }]}>Aún no tienes reportes</Text>
+        <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
           Cuando crees un reporte de baches, luminarias o fallas urbanas, aparecerá en esta cuadrícula.
         </Text>
         <TouchableOpacity
-          style={styles.createReportBtn}
+          style={[styles.createReportBtn, { backgroundColor: theme.button }]}
           onPress={() => navigation.navigate('Create')}
         >
           <Ionicons name="add-circle-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
@@ -261,15 +263,15 @@ export default function ProfileScreen() {
 
   if (loadingProfile && !refreshing) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2c4d4e" />
-        <Text style={{ marginTop: 10, color: '#666' }}>Cargando perfil...</Text>
+      <View style={[styles.centered, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.activityIndicator} />
+        <Text style={{ marginTop: 10, color: theme.textSecondary }}>Cargando perfil...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <FlatList
         data={userReports}
         keyExtractor={(item) => item.id}
@@ -281,7 +283,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2c4d4e']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.activityIndicator]} />
         }
       />
     </SafeAreaView>
@@ -291,7 +293,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -301,7 +302,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   headerContainer: {
     paddingTop: 10,
@@ -316,7 +316,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   settingsBtn: {
     padding: 4,
@@ -330,15 +329,12 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
     borderRadius: 41,
-    backgroundColor: '#eee',
     borderWidth: 2,
     borderColor: '#2c4d4e',
   },
   placeholderAvatar: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderColor: '#ddd',
   },
   statsContainer: {
     flex: 1,
@@ -352,11 +348,9 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#222',
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   bioSection: {
@@ -365,7 +359,6 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#222',
     marginBottom: 3,
   },
   locationRow: {
@@ -375,27 +368,21 @@ const styles = StyleSheet.create({
   address: {
     marginLeft: 4,
     fontSize: 13,
-    color: '#555',
   },
   editProfileButton: {
-    backgroundColor: '#f0f3f3',
     paddingVertical: 9,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#d0dcdc',
     marginBottom: 16,
   },
   editProfileButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2c4d4e',
   },
   tabSection: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e0e0e0',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
     paddingVertical: 10,
     marginBottom: 12,
   },
@@ -408,7 +395,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     fontWeight: '700',
-    color: '#2c4d4e',
   },
   columnWrapper: {
     justifyContent: 'space-between',
@@ -416,7 +402,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    height: CARD_WIDTH, // Aspect ratio 1:1 cuadrado (estilo Instagram)
+    height: CARD_WIDTH,
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#f2f2f2',
@@ -492,13 +478,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#444',
     marginTop: 12,
     marginBottom: 6,
   },
   emptySubtext: {
     fontSize: 13,
-    color: '#777',
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 16,
@@ -506,7 +490,6 @@ const styles = StyleSheet.create({
   createReportBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2c4d4e',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
