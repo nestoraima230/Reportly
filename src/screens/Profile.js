@@ -252,7 +252,7 @@ export default function ProfileScreen() {
         </Text>
         <TouchableOpacity
           style={[styles.createReportBtn, { backgroundColor: theme.button }]}
-          onPress={() => navigation.navigate('Create')}
+          onPress={() => navigation.navigate('Crear')}
         >
           <Ionicons name="add-circle-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
           <Text style={styles.createReportBtnText}>Crear un reporte</Text>

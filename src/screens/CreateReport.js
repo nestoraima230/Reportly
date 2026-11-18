@@ -130,7 +130,7 @@ export default function CreateReport({ navigation }) {
       });
 
       Alert.alert('¡Reporte publicado!', `Tu reporte "${titulo}" ha sido guardado.`);
-      navigation.navigate('Feed');
+      navigation.navigate('Publicaciones');
     } catch (error) {
       console.error('Error al publicar:', error);
       Alert.alert('Error', 'No se pudo guardar el reporte.');

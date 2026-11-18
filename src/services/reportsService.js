@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   onSnapshot,
   query,
@@ -145,4 +146,13 @@ export const updateReportStatus = async (reportId, newStatus) => {
     estado: newStatus,
     actualizadoEn: serverTimestamp(),
   });
+};
+
+/**
+ * Elimina un reporte por su ID de Firestore
+ * @param {string} reportId - ID del documento del reporte
+ */
+export const deleteReport = async (reportId) => {
+  const reporteRef = doc(db, 'reportes', reportId);
+  return await deleteDoc(reporteRef);
 };

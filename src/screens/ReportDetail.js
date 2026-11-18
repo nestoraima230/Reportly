@@ -1,15 +1,17 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Button, Alert, TouchableOpacity } from 'react-native';
+import React, { useContext, useLayoutEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, Button, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { ROLES } from '../constants/roles';
-import { updateReportStatus } from '../services/reportsService';
+import { updateReportStatus, deleteReport } from '../services/reportsService';
 import { useTheme } from '../constants/theme';
 
 export default function ReportDetail({ route }) {
-  const { userRole } = useContext(AuthContext);
+  const { user, userRole } = useContext(AuthContext);
   const navigation = useNavigation();
   const theme = useTheme();
+  const [eliminando, setEliminando] = useState(false);
 
   const report = route.params?.reporte || route.params?.report || {
     title: 'Reporte no disponible',
@@ -20,8 +22,67 @@ export default function ReportDetail({ route }) {
     comments: [],
     id: null,
     latitude: null,
-    longitude: null
+    longitude: null,
+    userId: null,
   };
+
+  const esAutor = Boolean(user?.uid && report?.userId && user.uid === report.userId);
+  const esAdmin = userRole === ROLES.ADMIN;
+  const puedeEliminar = esAutor || esAdmin;
+
+  const confirmarEliminacion = () => {
+    Alert.alert(
+      'Eliminar reporte',
+      '¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: ejecutarEliminacion,
+        },
+      ]
+    );
+  };
+
+  const ejecutarEliminacion = async () => {
+    if (!report.id) return;
+    setEliminando(true);
+    try {
+      await deleteReport(report.id);
+      Alert.alert('Reporte eliminado', 'El reporte ha sido eliminado correctamente.');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error al eliminar el reporte:', error);
+      Alert.alert('Error', 'No se pudo eliminar el reporte. Inténtalo de nuevo.');
+      setEliminando(false);
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (puedeEliminar && report.id) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={confirmarEliminacion}
+            disabled={eliminando}
+            style={{ paddingHorizontal: 10, paddingVertical: 5 }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            {eliminando ? (
+              <ActivityIndicator size="small" color="#e53935" />
+            ) : (
+              <Ionicons name="trash-outline" size={22} color="#e53935" />
+            )}
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: () => null,
+      });
+    }
+  }, [navigation, puedeEliminar, report.id, eliminando]);
 
   const cambiarEstado = async (nuevoEstado) => {
     try {
